@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--Banco de Dados do Agente PC-->
+
+<agentePC  nome = "APC1">   <!-- Pode ser que seja necessario usar um nome local e um nome global. O nome global eh para os agentes dispositivos -->
+		
+   <tarifa valor = "0"/> 
+   
+    <!-- Pontos de Medida -->
+   <tensaoPC valor="0"/>  
+   <correntePC valor="0"/>
+   <frequenciaPC valor="0"/> 
+   <potenciaPC valor="0"/>
+   <!-- colocar sentido  do fluxo de "encnia-->
+  
+     <!-- Pontos digitais e de comando-->
+   <cr>0</cr> <!-- Indica se a a uRede esta conectada ou nao a rede-->         
+   <falta> 0 </falta> <!-- Indicacao de faltapor um Agente chave. Preventivo em relacao a questao da regiao de sombreamento-->
+   <status>0</status>  
+     
+    <agentesGeracaoNaoControladas> <!-- Ver se sera necessario um atributo indicando se ha agentes ou nao-->
+      <AG1 tipo="FV"   estadoChave = "0" potencia= "0" />
+    </agentesGeracaoNaoControladas>
+
+    <agentesGeracaoControladas> <!-- Ver se sera necessario um atributo indicando se ha agentes ou nao-->
+        <AGC1 tipo="CaC"   estadoChave = "aberta" potencia= "0" />
+      </agentesGeracaoControladas>
+    	
+    <agentesArmazenamento>  <!-- Ver se sera necessario um atributo indicando se ha agentes ou nao-->
+      <AA1 tipo="Bateria"   estadoChave = "aberta" potencia= "0"  />
+    </agentesArmazenamento>
+    
+    <agentesCarga>
+     <AC1 estadoChave="fechada" tipo="trifasica" demanda="0" />
+    </agentesCarga>
+    
+	
+</agentePC>
