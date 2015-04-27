@@ -28,6 +28,7 @@ import jade.proto.SubscriptionResponder;
 //import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 //import jade.domain.FIPAAgentManagement.RefuseException;
 
+
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -35,6 +36,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
+
 
 
 //Foram incluídas automaticamente
@@ -101,7 +103,13 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 //						System.out.println("Deu pau!");
 //					}
 					
-					agenteAGBD.getChild("pontos_medida").getChild("potencia").setText(filtro_Inform.getContent()); /*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
+					String conteudo = filtro_Inform.getContent();  //Pego o conteudo da mensagem
+					String potencia = conteudo.split("/")[0]; /*A mensagem é no formato:  "potencia gerada/estado da chave". Foi aplicado o método split para quebrar o "conteudo" em 
+					array sendo a separação definida pelo caracter "/". Da separação eu peguei a posição 0 da array que corresponde a potencia gerada pelo dispositivo monitorado.*/
+//					System.out.println("A referencia da carga é: "+refCarga); //Só pra testar se tava dando certo
+					String estadoChave = conteudo.split("/")[1];
+					
+					agenteAGBD.getChild("pontos_medida").getChild("potencia").setText(potencia); /*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
 					/* Essa parte é opcional. Creio que não seja necessário responder ao matlab que deu certo.
 					 * ACLMessage resposta = filtro_Inform.createReply();
 					resposta.setPerformative(ACLMessage.AGREE);
@@ -138,15 +146,6 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 			
 		});	//Fim do SubscriptionResponder
 	} // fim do public void setup
-
-	/*
-	 * public void exibirMensagem(ACLMessage msg){
-	 * 
-	 * System.out.println("\n\n===============<<MENSAGEM>>==============");
-	 * System.out.println("De: " + msg.getSender()); System.out.println("Para: "
-	 * + this.getName()); System.out.println("Conteudo: " + msg.getContent());
-	 * System.out.println("============================================="); }
-	 */
 
 	/**
 	 * Método para exibição de mensagens ACL

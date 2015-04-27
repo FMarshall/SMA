@@ -104,10 +104,12 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 //					}
 					
 					String conteudo = filtro_Inform.getContent();  //Pego o conteudo da mensagem
-					String refCarga = conteudo.split("/")[0]; /*A mensagem é no formato:  "referencia da carga/potencia demandada". Foi aplicado o método split para quebrar o "conteudo" em 
+					
+					String valorCarga = conteudo.split("/")[0]; // Valor da carga demandada
+					String estadoChave = conteudo.split("/")[1]; // Estado da chave
+					String refCarga = conteudo.split("/")[2]; /*A mensagem é no formato:  "referencia da carga/potencia demandada". Foi aplicado o método split para quebrar o "conteudo" em 
 					array sendo a separação definida pelo caracter "/". Da separação eu peguei a posição 0 da array que corresponde a referência da carga monitorada, visto que pode ter várias cargas.*/
 //					System.out.println("A referencia da carga é: "+refCarga); //Só pra testar se tava dando certo
-					String valorCarga = conteudo.split("/")[1];
 					
 					agenteADBD.getChild("cargas").getChild(refCarga).setAttribute("demanda",valorCarga);	//seta o XML do agente atualizando o valor da demanda
 					
@@ -148,15 +150,6 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 			
 		});	//Fim do SubscriptionResponder
 	} // fim do public void setup
-
-	/*
-	 * public void exibirMensagem(ACLMessage msg){
-	 * 
-	 * System.out.println("\n\n===============<<MENSAGEM>>==============");
-	 * System.out.println("De: " + msg.getSender()); System.out.println("Para: "
-	 * + this.getName()); System.out.println("Conteudo: " + msg.getContent());
-	 * System.out.println("============================================="); }
-	 */
 
 	/**
 	 * Método para exibição de mensagens ACL

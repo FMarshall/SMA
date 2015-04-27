@@ -256,15 +256,6 @@ public class agentePC extends Agent { /**
 
 	} // fim do public void setup
 
-	/*
-	 * public void exibirMensagem(ACLMessage msg){
-	 * 
-	 * System.out.println("\n\n===============<<MENSAGEM>>==============");
-	 * System.out.println("De: " + msg.getSender()); System.out.println("Para: "
-	 * + this.getName()); System.out.println("Conteudo: " + msg.getContent());
-	 * System.out.println("============================================="); }
-	 */
-
 	/**
 	 * Método para exibição de mensagens ACL
 	 *  @param msg recebe uma mensagem to tipo ALCMessage
