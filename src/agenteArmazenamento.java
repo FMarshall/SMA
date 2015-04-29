@@ -123,8 +123,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 					myAgent.send(resposta);*/
 					
 //					agenteApcBD.getChild("estado").setText("aberta");
-					
-					
+					//teste/////
 				}// fim o if para saber se inform != null
 			} // fim do onTick 
 		}); //fim do comportamento temporal TickerBehaviour
