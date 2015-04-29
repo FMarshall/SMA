@@ -59,7 +59,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 	public void setup()
 	{
 		final String nomeAgente = getLocalName(); //a variável "nomeAgente" recebe o nome local do agente 
-		final Element agenteADBD = carregaBD(nomeAgente); //Chama o método carregaBD que carrega o BD do agente "nomeAgente"
+		final Element agenteAABD = carregaBD(nomeAgente); //Chama o método carregaBD que carrega o BD do agente "nomeAgente"
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
@@ -112,7 +112,8 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 //					System.out.println("A referencia da carga é: "+refCarga); //Só pra testar se tava dando certo
 					String estadoChave = conteudo.split("/")[1];
 					
-					agenteADBD.getChild("cargas").getChild(refCarga).setAttribute("demanda",valorCarga);	//seta o XML do agente atualizando o valor da demanda
+					agenteAABD.getChild("soc").setText(SOC);	//seta o XML do agente atualizando o valor da SOC
+					agenteAABD.getChild("estadoChave").setText(estadoChave); //seta o XML do agente atualizando o estado da chave
 					
 					/*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
 					/* Essa parte é opcional. Creio que não seja necessário responder ao matlab que deu certo.
@@ -142,7 +143,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 
 			protected ACLMessage handleSubscription(ACLMessage subscription){
 				ACLMessage resposta = subscription.createReply();
-				String Potencia = agenteADBD.getChild("pontos_medida").getChildText("potencia");
+				String Potencia = agenteAABD.getChild("pontos_medida").getChildText("potencia");
 				resposta.setContent(Potencia);
 				resposta.setPerformative(ACLMessage.AGREE);
 				

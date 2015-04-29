@@ -2,46 +2,12 @@
 
 <agenteArmazenamento nome = "AP1_1" tipo="bateria">
   
-  
-   <!-- Pontos digitais e de comando-->
-   <estadoChave>1</estadoChave> <!-- Estado da chave do ponto de conexao(aberto ou fechado)-->
-   <status>0</status>  <!-- Indica se esta injetando ou recebendo potencia-->       
-   
-   <!--   ===============Pontos de supervisao do inversor ===============-->
-   <pontos_inversor>
-     <pontos_medida>     <!-- Pontos de supervisão de Medida do inversor -->
-       <tensao valor="0"/>  
-       <corrente valor="0"/>
-       <frequencia valor="0"/>  <!-- frequencia na saída do inversor Hz-->
-       <potencia_ativa valor="0" sentido="0"/>
-       <potencia_reativa valor="0" sentido="0"/>
-     </pontos_medida>
-     
-     <atuacao_protecoes>  <!-- Pontos de supervisão relacionada as Protecoes inversor--> 
-       <prot_subtensao>0</prot_subtensao> <!-- atuacao protecao de subtensao -->
-       <prot_sobretensao>0</prot_sobretensao> <!-- atuacao protecao de sobretensao -->
-       <prot_subfrequencia>0</prot_subfrequencia>
-       <prot_sobrefrequencia>0</prot_sobrefrequencia>
-     </atuacao_protecoes>
-     
-   </pontos_inversor>
-   <!-- =============== Fim - Pontos de supervisao do inversor===============-->
-   
-    <!--   ===============Pontos de supervisao  da bateria===============-->
-   <pontos_bateria>  
-   
-     <pontos_medida> <!-- Pontos de Medidada bateria-->
-       <soc>0</soc> <!-- estado da carga em porcentagem-->
-       <arm_tensao valor="0"/>  <!-- Serah tensao de fase ou de linha? Ou tanto faz? Serah em Volts-->
-       <arm_corrente valor=""/>
-       <arm_potencia valor=""/>
-     </pontos_medida>
-     
-     
 
-     </pontos_bateria>
-     <!-- =============== Fim - Pontos de supervisao da bateria ===============-->
-      
+   <!-- Pontos digitais e de comando-->
+   <estadoChave>0</estadoChave> <!-- Estado da chave do ponto de conexao(aberto ou fechado)-->
+   <soc></soc>  <!--Indica o valor do estado de carga bateria-->
+   <status>0</status>  <!-- Indica o modo de atuacao (fonte de corrente ou tensao)-->       
+       
       
 </agenteArmazenamento>
 
