@@ -6,10 +6,10 @@
    <estadoChave>0</estadoChave> <!-- Estado da chave do ponto de conexao(aberto ou fechado)-->
    
     <pontos_medida>     <!-- Pontos de supervisão de Medida do inversor -->
-      <tensao>   </tensao>  <!-- Serah tensao de fase ou de linha? Ou tanto faz? Serah em Volts-->
-      <corrente>   </corrente>
-      <frequencia>   </frequencia>  
-      <potencia></potencia>
+      <tensao>   0</tensao>  <!-- Serah tensao de fase ou de linha? Ou tanto faz? Serah em Volts-->
+      <corrente>  0 </corrente>
+      <frequencia> 0  </frequencia>  
+      <potencia>0</potencia>
     </pontos_medida>
       
 </agenteGeracao>

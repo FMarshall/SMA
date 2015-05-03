@@ -5,7 +5,7 @@
 
    <!-- Pontos digitais e de comando-->
    <estadoChave>0</estadoChave> <!-- Estado da chave do ponto de conexao(aberto ou fechado)-->
-   <soc></soc>  <!--Indica o valor do estado de carga bateria-->
+   <soc>0</soc>  <!--Indica o valor do estado de carga bateria-->
    <status>0</status>  <!-- Indica o modo de atuacao (fonte de corrente ou tensao)-->       
        
       

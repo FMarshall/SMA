@@ -79,10 +79,8 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 		 * intermitente. 
 		 */
 		addBehaviour(new TickerBehaviour(this,100) {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
+			
+			private static final long serialVersionUID = 1L;  //Incluído automaticamente
 
 			public void onTick(){
 
@@ -128,11 +126,7 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 		 *		 Parte do FIPA Subscribe participante para receeber solicitação do APC para
 		 *informar o valor de potência que está sendo gerada pela geração intermitente
 		 **********************************************************************************************************************/
-		
 		addBehaviour(new SubscriptionResponder(this, filtroSubscribe) {
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
 
 			protected ACLMessage handleSubscription(ACLMessage subscription){

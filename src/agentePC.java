@@ -12,15 +12,21 @@
  * CR : conexão a rede. Diz se a urrede está conectada a rede e consequente o estado da chave do PCC. 1-conectado/fechado 0-
  ************************************************************************************************************/
 
+
 import jade.core.Agent;
 //import java.util.Iterator;
 import jade.lang.acl.ACLMessage; //Relacionada a endereçoes
-//import jade.core.AID;    //Relacionada a endereços
+import jade.core.AID;    //Relacionada a endereços
 import jade.lang.acl.MessageTemplate; // Para uso dos filtros
-//import jade.domain.FIPANames; //Para uso dos filtros
+import jade.proto.SubscriptionInitiator;
+import jade.domain.FIPANames; //Foi solicitado no protocolo suscribe 
 //import jade.core.behaviours.CyclicBehaviour; //Para comportamento temporal
 
 import jade.core.behaviours.TickerBehaviour;
+
+
+
+
 
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
@@ -30,11 +36,18 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
 
+
+
+
+
 //Foram incluídas automaticamente
 import java.io.File;
 import java.io.IOException;
-//import java.util.Iterator;
-//import java.util.List; //Trantando com lista
+import java.util.Iterator;
+
+//Importados automaticamente. Para tratar de listas
+import java.util.List;
+import java.util.List; //Trantando com lista
 
 public class agentePC extends Agent { /**
 	 * 
@@ -103,46 +116,55 @@ public class agentePC extends Agent { /**
 		 * é feito seguindo o fluxograma idealizado. Se CR = 1 a urede está conectada a rede. Se 0, então está desconectada.
 		 * Isso definirá se a urede está em modo ilhado ou desconectado
 		 * */
-		
 		addBehaviour(new TickerBehaviour(this,100) {
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
 
 			public void onTick(){
+//				System.out.println("Entrou dentro do segundo comportamento temporal!!!!!");
 //				String cr =  agenteApcBD.getChild("cr").getText(); //Dá no mesmo que a seguinte linha de código
 				String cr =  agenteApcBD.getChildText("cr");
 //				System.out.println("O estado do PCC é "+cr+"." ); //Só pra testar se tá dando certo
 				
 				if (cr.equals("0")){
-					System.out.println("A microrrede está desconectada!");
+//					System.out.println("A microrrede está desconectada!");
 					
 					/********************************************************************************
 					 * FIPA Subscribe Initiator para saber o valor de Potência do DER e Carga
 					 ********************************************************************************/	
-//					ACLMessage msg = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
+					ACLMessage msgColetarPot = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
+					msgColetarPot.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+					msgColetarPot.setProtocol("Potencia");
 					
 					/**
 					 * Aqui vamos acessar o XML do APC para pesquisar o nome dos agentes de geração intermitente
 					 * e cargas para calcular o balanço de potência na microrrede
 					 * */
-//					List lista = agenteApcBD.getChild("sentido").getChild("sentido1").getChild("outrasChaves").getChildren(); 
-//					Iterator i = lista.iterator();
-//					
-//				    while(i.hasNext()) {
-//				    	Element elemento = (Element) i.next();
-//
-//				    	String nome = String.valueOf(elemento.getText());
-//				    
-//				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){
-//				    		//quantChaves();
+					List lista = agenteApcBD.getChild("agentesGeracaoNaoControladas").getChildren(); 
+					Iterator i = lista.iterator();
+					
+				    while(i.hasNext()) {
+				    	Element elemento = (Element) i.next();
+
+				    	String nome = String.valueOf(elemento.getText());
+				    
+				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){
+							System.out.println("Entrou no ifl!!!!!");
+				    		//quantChaves();
 //				    		cont1 = cont1 + 1;
-//				    		System.out.println("-"+getLocalName()+": mandando sinal de abertura para "+nome);
-//				    		msg.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
-//				    		//System.out.println("o valor atual de cont1 �: "+cont1);
-//				    	}
-//				    }
+				    		System.out.println("-"+getLocalName()+": Solicitando valor de carga a "+nome);
+				    		msgColetarPot.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+				    		//System.out.println("o valor atual de cont1 �: "+cont1);
+				    	}
+				    }
+				    
+				    addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
+				   
+						private static final long serialVersionUID = 1L;
+
+						protected void handleAgree(ACLMessage agree){
+				    		
+				    	}//Fim do handleAgree do Subscribe
+				    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
 				    //Obs.: Por enquanto vou colocar valores aleatórios para cacular o balanço de potência na microrrede
 				    // Mas ai tenho que já ter uma base da potência da microrrede, das cargas...
 					
