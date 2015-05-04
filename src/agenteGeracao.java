@@ -22,11 +22,13 @@ import jade.lang.acl.MessageTemplate; // Para uso dos filtros
 //import jade.core.behaviours.CyclicBehaviour; //Para comportamento temporal
 
 import jade.core.behaviours.TickerBehaviour;
+import jade.domain.FIPANames; //Foi exigida quando inseri o filtro de mensagens do protocolo FIPA Subscribe
 import jade.proto.SubscriptionResponder;
 //As bibliotecas abaixo foram exigidas no decorrer do SubscriptionResponder
 //import jade.domain.FIPAAgentManagement.FailureException;
 //import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 //import jade.domain.FIPAAgentManagement.RefuseException;
+
 
 
 //Bibliotecas para lidar com arquivos XML
@@ -36,6 +38,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
+
 
 
 
@@ -60,8 +63,7 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM); //Filtro para receber informações do matlab de potência demandada pelas cargas
-		MessageTemplate filtroSubscribe = MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE); //Filtro para receber solicitação de informação da potência das cargas
-		
+		MessageTemplate filtroSubscribe = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE),MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE)); 
 		
 //		System.out.println(".:: Agente PCC APCC1 iniciado com sucesso! ::.\n");
 //		System.out.println("Todas as minhas informações: \n" +getAID());
