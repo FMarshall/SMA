@@ -28,6 +28,7 @@ import jade.core.behaviours.TickerBehaviour;
 
 
 
+
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -35,6 +36,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
+
 
 
 
@@ -76,7 +78,7 @@ public class agentePC extends Agent { /**
 //		while(it.hasNext()){
 //			System.out.println("- "+it.next());
 //		}
-		
+
 		addBehaviour(new TickerBehaviour(this,100) {
 			public void onTick(){
 
@@ -103,6 +105,16 @@ public class agentePC extends Agent { /**
 //						String cr =  agenteApcBD.getChild("cr").getText(); //Dá no mesmo que a seguinte linha de código
 						String cr =  agenteApcBD.getChildText("cr");
 						System.out.println("O estado do PCC é "+cr+"." ); //Só pra testar se tá dando certo
+						
+						/*
+						 * Eu pus um delay porque primeiro o APC, AG e AA devem receber os dados do Matlab para somente depois 
+						 * o APC começar a analisar o balanço de energia e começar uma coordenação de tudo.
+						 */
+						try {
+						    Thread.sleep(10000);                 //Delay em milisegundos
+						} catch(InterruptedException ex) {
+						    Thread.currentThread().interrupt();
+						}
 						
 						if (cr.equals("0")){
 //							System.out.println("A microrrede está desconectada!");

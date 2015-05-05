@@ -55,7 +55,8 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	
+	
 	public void setup()
 	{
 		final String nomeAgente = getLocalName(); //a variável "nomeAgente" recebe o nome local do agente 
@@ -80,6 +81,7 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 		 * Este comportamente temporial é somente para aquisição de dados do matlab, no caso, de um sistema de geração
 		 * intermitente. 
 		 */
+		
 		addBehaviour(new TickerBehaviour(this,100) {
 			
 			private static final long serialVersionUID = 1L;  //Incluído automaticamente
