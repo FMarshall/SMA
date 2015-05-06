@@ -31,7 +31,7 @@
     </agentesArmazenamento>
     
     <agentesCarga>
-     <AC1 estadoChave="fechada" tipo="trifasica" demanda="0" />
+     <AD1 estadoChave="fechada" tipo="trifasica" demanda="0" />
     </agentesCarga>
     
 	

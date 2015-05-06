@@ -146,7 +146,7 @@ public class agentePC extends Agent { /**
 				    	
 				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 //									System.out.println("Entrou no if!!!!!");  //Só pra testar
-				    		exibirAviso(myAgent, "Solicitando valor de carga a " +nome);
+				    		exibirAviso(myAgent, "Solicitando valor de potencia gerada a " +nome);
 				    		msgColetarPot.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 				    	}
 				    }
@@ -191,14 +191,15 @@ public class agentePC extends Agent { /**
 					 * e cargas para calcular o balanço de potência na microrrede
 					 * */
 					List lista2 = agenteApcBD.getChild("agentesCarga").getChildren(); 
-//							System.out.println("O nome dos AGs intermitentes são: "+lista);
-					Iterator i2 = lista.iterator();
+					System.out.println("O nome dos ADs são: "+lista2);
+					Iterator i2 = lista2.iterator();
 					
 				    while(i2.hasNext()) {
 				    	Element elemento = (Element) i2.next();
 				    	String nome = String.valueOf(elemento.getName());
-//						    	System.out.println("O nome é: "+nome);  //Só pra testar 
-				    	
+//						System.out.println("O nome é: "+nome);  //Só pra testar 
+				    	exibirAviso(myAgent, "Solicitando valor de potencia demandada a: "+nome);
+						
 				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 //									System.out.println("Entrou no if!!!!!");  //Só pra testar
 				    		exibirAviso(myAgent, "Solicitando valor de carga a " +nome);
