@@ -31,6 +31,7 @@ import jade.proto.SubscriptionResponder;
 
 
 
+
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -42,11 +43,14 @@ import org.jdom2.input.SAXBuilder; //This package support classes for building J
 
 
 
+
 //Foram incluídas automaticamente
 import java.io.File;
 import java.io.IOException;
 //import java.util.Iterator;
 //import java.util.List; //Trantando com lista
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua vez é uma subclasse
 									// da classe "Agent"
@@ -151,11 +155,36 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 	 *  
 	 */
 	public void exibirMensagem(ACLMessage msg) {
-		System.out.println("\n\n===============<<MENSAGEM>>==============");
+		System.out.println("\n\n===============<<MENSAGEM>>==================");    	
 		System.out.println("De: " + msg.getSender());
 		System.out.println("Para: " + this.getName());
 		System.out.println("Conteudo: " + msg.getContent());
-		System.out.println("=============================================");
+		
+		Calendar cal = Calendar.getInstance();
+    	cal.getTime();
+//		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+//    	SimpleDateFormat sdf = new SimpleDateFormat("E yyyy.MM.dd 'at' hh:mm:ssss a zzz");
+    	SimpleDateFormat sdf = new SimpleDateFormat("E dd.MM.yyyy 'at' hh:mm:ssss a");
+    	System.out.println( sdf.format(cal.getTime()) );
+    	
+//		System.out.println(System . currentTimeMillis ());
+		
+	}
+	
+	public void exibirAviso(Agent myAgent, String aviso){
+	    	
+		System.out.println("\n\n-----------------<<AVISO>>------------------");
+		System.out.println("Agente: "+myAgent.getLocalName());
+		System.out.println("Aviso: " +aviso);
+		
+		Calendar cal = Calendar.getInstance();
+    	cal.getTime();
+//		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+//    	SimpleDateFormat sdf = new SimpleDateFormat("E yyyy.MM.dd 'at' hh:mm:ssss a zzz");
+    	SimpleDateFormat sdf = new SimpleDateFormat("E dd.MM.yyyy 'at' hh:mm:ssss a");
+    	System.out.println( sdf.format(cal.getTime()) );
+    	
+//		System.out.println(System . currentTimeMillis ());
 	}
 
 	/**

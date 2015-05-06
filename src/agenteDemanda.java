@@ -22,11 +22,14 @@ import jade.lang.acl.MessageTemplate; // Para uso dos filtros
 //import jade.core.behaviours.CyclicBehaviour; //Para comportamento temporal
 
 import jade.core.behaviours.TickerBehaviour;
+import jade.domain.FIPANames;
 import jade.proto.SubscriptionResponder;
 //As bibliotecas abaixo foram exigidas no decorrer do SubscriptionResponder
 //import jade.domain.FIPAAgentManagement.FailureException;
 //import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 //import jade.domain.FIPAAgentManagement.RefuseException;
+
+
 
 
 //Bibliotecas para lidar com arquivos XML
@@ -39,11 +42,15 @@ import org.jdom2.input.SAXBuilder; //This package support classes for building J
 
 
 
+
+
 //Foram incluídas automaticamente
 import java.io.File;
 import java.io.IOException;
 //import java.util.Iterator;
 //import java.util.List; //Trantando com lista
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua vez é uma subclasse
 									// da classe "Agent"
@@ -60,7 +67,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-		MessageTemplate filtroSubscribe = MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE);
+		MessageTemplate filtroSubscribe = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE),MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE)); 
 		
 		
 //		System.out.println(".:: Agente PCC APCC1 iniciado com sucesso! ::.\n");
@@ -157,11 +164,36 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 	 *  
 	 */
 	public void exibirMensagem(ACLMessage msg) {
-		System.out.println("\n\n===============<<MENSAGEM>>==============");
+		System.out.println("\n\n===============<<MENSAGEM>>==================");    	
 		System.out.println("De: " + msg.getSender());
 		System.out.println("Para: " + this.getName());
 		System.out.println("Conteudo: " + msg.getContent());
-		System.out.println("=============================================");
+		
+		Calendar cal = Calendar.getInstance();
+    	cal.getTime();
+//		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+//    	SimpleDateFormat sdf = new SimpleDateFormat("E yyyy.MM.dd 'at' hh:mm:ssss a zzz");
+    	SimpleDateFormat sdf = new SimpleDateFormat("E dd.MM.yyyy 'at' hh:mm:ssss a");
+    	System.out.println( sdf.format(cal.getTime()) );
+    	
+//		System.out.println(System . currentTimeMillis ());
+		
+	}
+	
+	public void exibirAviso(Agent myAgent, String aviso){
+	    	
+		System.out.println("\n\n-----------------<<AVISO>>------------------");
+		System.out.println("Agente: "+myAgent.getLocalName());
+		System.out.println("Aviso: " +aviso);
+		
+		Calendar cal = Calendar.getInstance();
+    	cal.getTime();
+//		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+//    	SimpleDateFormat sdf = new SimpleDateFormat("E yyyy.MM.dd 'at' hh:mm:ssss a zzz");
+    	SimpleDateFormat sdf = new SimpleDateFormat("E dd.MM.yyyy 'at' hh:mm:ssss a");
+    	System.out.println( sdf.format(cal.getTime()) );
+    	
+//		System.out.println(System . currentTimeMillis ());
 	}
 
 	/**
