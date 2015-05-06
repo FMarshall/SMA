@@ -2,8 +2,8 @@
 
 <agenteDemanda nome = "AD1">
   <estadoChave>0</estadoChave>  
-   <cargas>
+  <cargas>
     <carga1 demanda="0"  tensao="0" corrente="0" frequencia="0" prioridade="1" estadoChave="0"/>
-   </cargas>
+  </cargas>
   
 </agenteDemanda>

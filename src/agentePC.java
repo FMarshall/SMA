@@ -31,6 +31,8 @@ import jade.core.behaviours.TickerBehaviour;
 
 
 
+
+
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -38,6 +40,8 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
+
+
 
 
 
@@ -165,6 +169,7 @@ public class agentePC extends Agent { /**
 						protected void handleAgree(ACLMessage agree){
 //							double valorRecebido = Double.parseDouble(agree.getContent());
 							valorPotGerRecebido = Double.parseDouble(agree.getContent());
+							exibirAviso(myAgent, "Recebi um valor de "+valorPotGerRecebido+" de "+agree.getSender());
 							PotenciaGeracaoTotal = PotenciaGeracaoTotal + valorPotGerRecebido; 
 							valorPotGerRecebido = 0;
 //							exibirAviso(myAgent, "O valor da potencia gerada é: "+PotenciaGeracaoI);
@@ -191,14 +196,14 @@ public class agentePC extends Agent { /**
 					 * e cargas para calcular o balanço de potência na microrrede
 					 * */
 					List lista2 = agenteApcBD.getChild("agentesCarga").getChildren(); 
-					System.out.println("O nome dos ADs são: "+lista2);
+//					System.out.println("O nome dos ADs são: "+lista2); //Só pra ver se deu certo
 					Iterator i2 = lista2.iterator();
 					
 				    while(i2.hasNext()) {
 				    	Element elemento = (Element) i2.next();
 				    	String nome = String.valueOf(elemento.getName());
 //						System.out.println("O nome é: "+nome);  //Só pra testar 
-				    	exibirAviso(myAgent, "Solicitando valor de potencia demandada a: "+nome);
+//				    	exibirAviso(myAgent, "Solicitando valor de potencia demandada a: "+nome); //Só pra ver se deu certo
 						
 				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 //									System.out.println("Entrou no if!!!!!");  //Só pra testar
@@ -220,9 +225,12 @@ public class agentePC extends Agent { /**
 						protected void handleAgree(ACLMessage agree){
 //							double valorRecebido = Double.parseDouble(agree.getContent());
 							valorPotDemRecebido = Double.parseDouble(agree.getContent());
+							exibirAviso(myAgent, "Recebi um valor de "+valorPotDemRecebido+" de "+agree.getSender());
 							PotenciaDemandaTotal = PotenciaDemandaTotal + valorPotDemRecebido; 
 							valorPotDemRecebido = 0;
 //							exibirAviso(myAgent, "O valor da potencia gerada é: "+PotenciaGeracaoI);
+							
+							
 				    	}//Fim do handleAgree do Subscribe
 				
 						protected void handleRefuse(ACLMessage refuse) { //Se recusar
@@ -233,6 +241,13 @@ public class agentePC extends Agent { /**
 						}// Fim do handleFailure do Subscribe
 				    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPotCarga){
 				    
+//				    try {
+//					    Thread.sleep(10000);                 //Delay em milisegundos
+//					} catch(InterruptedException ex) {
+//					    Thread.currentThread().interrupt();
+//					}
+				    exibirAviso(myAgent, "A potência gerada total é: "+PotenciaGeracaoTotal);
+				    exibirAviso(myAgent, "A potência demandada total é: "+PotenciaDemandaTotal);
 				    deltaP = PotenciaGeracaoTotal - PotenciaDemandaTotal;
 				    exibirAviso(myAgent, "O balanço de potência atual é: "+deltaP);
 				    
@@ -372,7 +387,7 @@ public class agentePC extends Agent { /**
     	cal.getTime();
 //		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 //    	SimpleDateFormat sdf = new SimpleDateFormat("E yyyy.MM.dd 'at' hh:mm:ssss a zzz");
-    	SimpleDateFormat sdf = new SimpleDateFormat("E dd.MM.yyyy 'at' hh:mm:ssss a");
+    	SimpleDateFormat sdf = new SimpleDateFormat("E dd.MM.yyyy 'at' hh:mm:ssssss a");
     	System.out.println( sdf.format(cal.getTime()) );
     	
 //		System.out.println(System . currentTimeMillis ());

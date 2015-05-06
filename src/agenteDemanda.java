@@ -13,6 +13,7 @@
  * CR : conexão a rede. Diz se a urrede está conectada a rede e consequente o estado da chave do PCC. 1-conectado/fechado 0-
  ************************************************************************************************************/
 
+import jade.core.AID;
 import jade.core.Agent;
 //import java.util.Iterator;
 import jade.lang.acl.ACLMessage; //Relacionada a endereçoes
@@ -32,6 +33,8 @@ import jade.proto.SubscriptionResponder;
 
 
 
+
+
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -44,6 +47,8 @@ import org.jdom2.input.SAXBuilder; //This package support classes for building J
 
 
 
+
+
 //Foram incluídas automaticamente
 import java.io.File;
 import java.io.IOException;
@@ -51,13 +56,14 @@ import java.io.IOException;
 //import java.util.List; //Trantando com lista
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 
 public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua vez é uma subclasse
 									// da classe "Agent"
 
-	/**
-	 * 
-	 */
+	double potenciaTotalCargas = 0; //potencia total de todas as cargas
+	
 	private static final long serialVersionUID = 1L;
 
 	public void setup()
@@ -148,8 +154,31 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 
 			protected ACLMessage handleSubscription(ACLMessage subscription){
 				ACLMessage resposta = subscription.createReply();
-				String Potencia = agenteADBD.getChild("pontos_medida").getChildText("potencia");
-				resposta.setContent(Potencia);
+//				String Potencia = agenteADBD.getChild("cargas").getChildText("potencia");
+				/*Tenho que acessar todas os valores de todas as cargas. Faço um while pra acessar os elementos do XML e ir 
+				somando as potências demandadas*/
+				
+				List lista = agenteADBD.getChild("cargas").getChildren(); 
+//				System.out.println("A referência das cargas são: "+lista);  //Sò pra testar se deu certo
+				Iterator i = lista.iterator();
+				
+			    while(i.hasNext()) {
+			    	Element elemento = (Element) i.next();
+			    	String nome = String.valueOf(elemento.getName());
+//					System.out.println("O nome é: "+nome);  //Só pra testar 
+//			    	exibirAviso(myAgent, "Solicitando valor de potencia demandada a: "+nome);
+					double valorCarga = 0;
+			    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//								System.out.println("Entrou no if!!!!!");  //Só pra testar
+			    		
+			    		valorCarga = Double.parseDouble(elemento.getAttributeValue("demanda"));
+			    		exibirAviso(myAgent, "O valor da carga de " +nome+" é " +valorCarga);
+			    		potenciaTotalCargas = potenciaTotalCargas + valorCarga;
+			    		valorCarga = 0;
+			    	}
+			    }
+				
+				resposta.setContent(String.valueOf(potenciaTotalCargas));
 				resposta.setPerformative(ACLMessage.AGREE);
 				
 				return resposta;
