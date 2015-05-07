@@ -245,7 +245,7 @@ public class agentePC extends Agent { /**
 //					}
 				    
 				    // Add the WakerBehaviour (wakeup-time 10 secs)
-				    addBehaviour(new WakerBehaviour(myAgent, 10000) {
+				    addBehaviour(new WakerBehaviour(myAgent, 1000) {
 				    	protected void handleElapsedTimeout() {
 				    		exibirAviso(myAgent, "Agent "+myAgent.getLocalName()+": It's wakeup-time. Bye...");
 						    exibirAviso(myAgent, "A potência gerada total é: "+PotenciaGeracaoTotal);
