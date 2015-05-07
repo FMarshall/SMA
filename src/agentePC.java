@@ -24,13 +24,7 @@ import jade.domain.FIPANames; //Foi solicitado no protocolo suscribe
 
 import jade.core.behaviours.TickerBehaviour;
 
-
-
-
-
-
-
-
+import jade.core.behaviours.WakerBehaviour;
 
 
 //Bibliotecas para lidar com arquivos XML
@@ -156,7 +150,7 @@ public class agentePC extends Agent { /**
 				    }
 				    
 				    addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
-				   
+				    	
 						private static final long serialVersionUID = 1L; //Posto automaticamente
 //						double PotenciaGeracaoTotal, valorPotGerRecebido = 0; //Inicialização da potência gerada por gerações intermitentes (
 //						double PotenciaDemandaTotal, valorPotDemRecebido = 0; //Inicialização da potência demandada pelas cargas
@@ -167,11 +161,13 @@ public class agentePC extends Agent { /**
 						 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
 						 */
 						protected void handleAgree(ACLMessage agree){
-//							double valorRecebido = Double.parseDouble(agree.getContent());
+							exibirMensagem(agree);
+							double valorRecebido = Double.parseDouble(agree.getContent());
 							valorPotGerRecebido = Double.parseDouble(agree.getContent());
 							exibirAviso(myAgent, "Recebi um valor de "+valorPotGerRecebido+" de "+agree.getSender());
 							PotenciaGeracaoTotal = PotenciaGeracaoTotal + valorPotGerRecebido; 
 							valorPotGerRecebido = 0;
+							
 //							exibirAviso(myAgent, "O valor da potencia gerada é: "+PotenciaGeracaoI);
 				    	}//Fim do handleAgree do Subscribe
 				
@@ -223,6 +219,7 @@ public class agentePC extends Agent { /**
 						 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
 						 */
 						protected void handleAgree(ACLMessage agree){
+							exibirMensagem(agree);
 //							double valorRecebido = Double.parseDouble(agree.getContent());
 							valorPotDemRecebido = Double.parseDouble(agree.getContent());
 							exibirAviso(myAgent, "Recebi um valor de "+valorPotDemRecebido+" de "+agree.getSender());
@@ -246,14 +243,20 @@ public class agentePC extends Agent { /**
 //					} catch(InterruptedException ex) {
 //					    Thread.currentThread().interrupt();
 //					}
-				    exibirAviso(myAgent, "A potência gerada total é: "+PotenciaGeracaoTotal);
-				    exibirAviso(myAgent, "A potência demandada total é: "+PotenciaDemandaTotal);
-				    deltaP = PotenciaGeracaoTotal - PotenciaDemandaTotal;
-				    exibirAviso(myAgent, "O balanço de potência atual é: "+deltaP);
 				    
+				    // Add the WakerBehaviour (wakeup-time 10 secs)
+				    addBehaviour(new WakerBehaviour(myAgent, 10000) {
+				    	protected void handleElapsedTimeout() {
+				    		exibirAviso(myAgent, "Agent "+myAgent.getLocalName()+": It's wakeup-time. Bye...");
+						    exibirAviso(myAgent, "A potência gerada total é: "+PotenciaGeracaoTotal);
+						    exibirAviso(myAgent, "A potência demandada total é: "+PotenciaDemandaTotal);
+						    deltaP = PotenciaGeracaoTotal - PotenciaDemandaTotal;
+						    exibirAviso(myAgent, "O balanço de potência atual é: "+deltaP);
+				    	}
+				    });
+					
 				    
-				    
-				    
+
 				    
 				    //Obs.: Por enquanto vou colocar valores aleatórios para cacular o balanço de potência na microrrede
 				    // Mas ai tenho que já ter uma base da potência da microrrede, das cargas...
