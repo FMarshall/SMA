@@ -18,12 +18,15 @@ import jade.core.Agent;
 import jade.lang.acl.ACLMessage; //Relacionada a endereçoes
 import jade.core.AID;    //Relacionada a endereços
 import jade.lang.acl.MessageTemplate; // Para uso dos filtros
+
+//Protocolos de comunicação
 import jade.proto.SubscriptionInitiator;
 import jade.domain.FIPANames; //Foi solicitado no protocolo suscribe 
-//import jade.core.behaviours.CyclicBehaviour; //Para comportamento temporal
+import jade.proto.ContractNetInitiator;
+import java.util.Vector;
 
+//Comportamentos cíclicos
 import jade.core.behaviours.TickerBehaviour;
-
 import jade.core.behaviours.WakerBehaviour;
 
 
@@ -244,7 +247,7 @@ public class agentePC extends Agent { /**
 //					    Thread.currentThread().interrupt();
 //					}
 				    
-				    // Add the WakerBehaviour (wakeup-time 10 secs)
+//				     Add the WakerBehaviour (wakeup-time 1 sec)
 				    addBehaviour(new WakerBehaviour(myAgent, 1000) {
 				    	protected void handleElapsedTimeout() {
 				    		exibirAviso(myAgent, "Agent "+myAgent.getLocalName()+": It's wakeup-time. Bye...");
@@ -252,107 +255,158 @@ public class agentePC extends Agent { /**
 						    exibirAviso(myAgent, "A potência demandada total é: "+PotenciaDemandaTotal);
 						    deltaP = PotenciaGeracaoTotal - PotenciaDemandaTotal;
 						    exibirAviso(myAgent, "O balanço de potência atual é: "+deltaP);
+						    
+						    //Obs.: Por enquanto vou colocar valores aleatórios para cacular o balanço de potência na microrrede
+						    // Mas ai tenho que já ter uma base da potência da microrrede, das cargas...
+							
+							/**
+							 * Aqui supõe-se que eu já enviei um subscribe para o AG intermitente e cargas
+							 * e tenho o valor do balanço de potência na microrrede (deltaP)
+							 */
+//							double deltaP = -1000; //Balanço de potência na microrrede. 
+//							System.out.println("O valor do balanço é "+deltaP); //Só pra testar
+
+							/**
+							 * Um valor positivo de deltaP diz que tá sobrando energia. Um valor negativo, diz que tá com déficit, ou seja, 
+							 * não tem geração suficiente.
+							 * Se deltaP positivo tá tudo ok. 
+							 * Se deltaP negativo, então verifica-se se tem dispositivos armazenadores de energia. 
+							 *  */
+							if(deltaP<0){ 
+								/**se entrar nesse if, será necessário consultar o XMl para averiguar se há dispositivos
+								 * armazenadores de energia
+								 */
+								exibirAviso(myAgent, "Entrei dentro do if do deltaP");
+								/*********************************************************************************
+								 * FIPA Contract Net Initiator para negocia��o com outros ALs [1]
+								*********************************************************************************/
+								final ACLMessage negociarDeltaP = new ACLMessage(ACLMessage.CFP);
+								List lista3 = agenteApcBD.getChild("agentesArmazenamento").getChildren(); 
+								Iterator i3 = lista3.iterator();
+								
+							    while(i3.hasNext()) {
+							    	Element elemento = (Element) i3.next();
+							    	String nome = String.valueOf(elemento.getName());
+									
+							    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//												System.out.println("Entrou no if!!!!!");  //Só pra testar
+							    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
+							    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+							    	}
+							    }		
+							    negociarDeltaP.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+							    negociarDeltaP.setContent(String.valueOf(deltaP)); 
+							    
+							    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
+									
+									protected void handlePropose(ACLMessage propose, Vector v) {
+										
+										ACLMessage reply = propose.createReply();
+										reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+										v.addElement(reply);
+									}
+									
+									protected void handleRefuse(ACLMessage refuse) {
+										System.out.println(getLocalName() + ": Negociação recusada por " + refuse.getSender().getLocalName());
+
+////										System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
+//										
+//										ACLMessage aviso = negociarDeltaP.createReply();
+//										aviso.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+//										aviso.setPerformative(ACLMessage.REFUSE);
+//										aviso.setContent("0");
+//										
+//										myAgent.send(aviso);
+									}
+									
+									protected void handleFailure(ACLMessage failure) {
+										if (failure.getSender().equals(myAgent.getAMS())) {
+											// Notificação de erro feita pela plataforma
+											System.out.println("N�o existe outros agentes ALs");
+										}
+										else {
+											System.out.println("-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+										}
+										// Immediate failure --> we will not receive a response from this agent
+									}
+									
+									protected void handleAllResponses(Vector responses, Vector acceptances) {
+//										ACLMessage reply = responses.createReply();
+//										reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+//										reply.setContent("");
+						
+									}// Fim do handle all responses
+								}); //Fim do contract net initiator
+							  
+								/**
+								 * Se tiver dispositivos armazenadores, manda-se um contracte net para todos ao mesmo tempo 
+								 * solicitando um deltaP. Devo pegar um pouco de cada ou pego o de uma vez só? Como sei que só terá 
+								 * um banco de baterias vou fazer pegando só de um dispositivo de armazenamento logo.
+								 */
+								/*if(){   //Se tem dispositivos armazenadores de energia, então
+								*//*********************************************************************************
+								 * FIPA Contract Net Initiator para negociação deltaP com sistemas de armazenamento de energia
+								 *********************************************************************************//*
+									ACLMessage negociar = new ACLMessage(ACLMessage.CFP);
+									List lista1 = agenteAlimentadorBD.getChild("outrosALs").getChildren(); 
+									Iterator i = lista1.iterator();
+			
+			
+									while(i.hasNext()) {
+			
+										Element elemento = (Element) i.next();
+			
+										//String nome = String.valueOf(elemento.getText());
+										String nome = String.valueOf(elemento.getText());
+										System.out.println("-<<"+agenteAlimentador+">>: o outro AL � "+nome);
+										//negociar.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+										negociar.addReceiver(new AID( nome, AID.ISLOCALNAME));
+			
+									}
+			
+									// String carga = agenteAlimentadorBD.getChild("cargaPerdida").getAttributeValue("valor");
+									negociar.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+									negociar.setContent(carga); //Carga perdida
+			
+									addBehaviour(new ContractNetInitiator(myAgent, negociar) {
+			
+										protected void handlePropose(ACLMessage propose, Vector v) {
+											System.out.println("-<<"+agenteAlimentador+">>: o agente "+propose.getSender().getLocalName()+" disse "+propose.getContent());
+										}
+			
+										protected void handleRefuse(ACLMessage refuse) {
+											System.out.println("-<<"+agenteAlimentador+">>: o agente "+refuse.getSender().getLocalName()+" recusou");
+										}
+			
+										protected void handleFailure(ACLMessage failure) {
+											if (failure.getSender().equals(myAgent.getAMS())) {
+			
+												System.out.println("N�o existe outros agentes ALs");
+											}
+											else {
+												System.out.println("-<<"+agenteAlimentador+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+											}
+											// Immediate failure --> we will not receive a response from this agent
+										}
+			
+										protected void handleAllResponses(Vector responses, Vector acceptances) {
+			
+										}// fim do handleAllResponses do comportamento Contract net
+									}// fim do if para ver se
+									*/
+								
+//								}//Fim do if deltaP<0
+								}else{
+									exibirAviso(myAgent, "Deu pau no deltaP");
+								}
 				    	}
 				    });
 					
 				    
 
 				    
-				    //Obs.: Por enquanto vou colocar valores aleatórios para cacular o balanço de potência na microrrede
-				    // Mas ai tenho que já ter uma base da potência da microrrede, das cargas...
+				   
 					
-					/**
-					 * Aqui supõe-se que eu já enviei um subscribe para o AG intermitente e cargas
-					 * e tenho o valor do balanço de potência na microrrede (deltaP)
-					 */
-//					double deltaP = -1000; //Balanço de potência na microrrede. 
-//					System.out.println("O valor do balanço é "+deltaP); //Só pra testar
-
-					/**
-					 * Um valor positivo de deltaP diz que tá sobrando energia. Um valor negativo, diz que tá com déficit, ou seja, 
-					 * não tem geração suficiente.
-					 * Se deltaP positivo tá tudo ok. 
-					 * Se deltaP negativo, então verifica-se se tem dispositivos armazenadores de energia. 
-					 *  */
-					if(deltaP<0){ 
-						/**se entrar nesse if, será necessário consultar o XMl para averiguar se há dispositivos
-						 * armazenadores de energia
-						 */
-//								List lista = agenteChaveBD.getChild("sentido").getChild("sentido2").getChild("outrasChaves").getChildren(); 
-//
-//								Iterator i = lista.iterator();
-//
-//								while(i.hasNext()) {
-//									Element elemento = (Element) i.next();
-//									String nome = String.valueOf(elemento.getText());
-//									if (nome!= null && nome.length()>0 && nome!= "nenhum"){
-//										
-//										cont1 = cont1 + 1;
-//										System.out.println("As outras chaves s�o: "+nome);
-//										msg.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
-//
-//									}
-//								}// fim do while(i.hasNext())
-				
-//								msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-//								msg.setContent("abrir");
-						
-						/**
-						 * Se tiver dispositivos armazenadores, manda-se um contracte net para todos ao mesmo tempo 
-						 * solicitando um deltaP. Devo pegar um pouco de cada ou pego o de uma vez só? Como sei que só terá 
-						 * um banco de baterias vou fazer pegando só de um dispositivo de armazenamento logo.
-						 */
-						/*if(){   //Se tem dispositivos armazenadores de energia, então
-						*//*********************************************************************************
-						 * FIPA Contract Net Initiator para negociação deltaP com sistemas de armazenamento de energia
-						 *********************************************************************************//*
-							ACLMessage negociar = new ACLMessage(ACLMessage.CFP);
-							List lista1 = agenteAlimentadorBD.getChild("outrosALs").getChildren(); 
-							Iterator i = lista1.iterator();
-	
-	
-							while(i.hasNext()) {
-	
-								Element elemento = (Element) i.next();
-	
-								//String nome = String.valueOf(elemento.getText());
-								String nome = String.valueOf(elemento.getText());
-								System.out.println("-<<"+agenteAlimentador+">>: o outro AL � "+nome);
-								//negociar.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
-								negociar.addReceiver(new AID( nome, AID.ISLOCALNAME));
-	
-							}
-	
-							// String carga = agenteAlimentadorBD.getChild("cargaPerdida").getAttributeValue("valor");
-							negociar.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-							negociar.setContent(carga); //Carga perdida
-	
-							addBehaviour(new ContractNetInitiator(myAgent, negociar) {
-	
-								protected void handlePropose(ACLMessage propose, Vector v) {
-									System.out.println("-<<"+agenteAlimentador+">>: o agente "+propose.getSender().getLocalName()+" disse "+propose.getContent());
-								}
-	
-								protected void handleRefuse(ACLMessage refuse) {
-									System.out.println("-<<"+agenteAlimentador+">>: o agente "+refuse.getSender().getLocalName()+" recusou");
-								}
-	
-								protected void handleFailure(ACLMessage failure) {
-									if (failure.getSender().equals(myAgent.getAMS())) {
-	
-										System.out.println("N�o existe outros agentes ALs");
-									}
-									else {
-										System.out.println("-<<"+agenteAlimentador+">>: o agente "+failure.getSender().getLocalName()+" falhou");
-									}
-									// Immediate failure --> we will not receive a response from this agent
-								}
-	
-								protected void handleAllResponses(Vector responses, Vector acceptances) {
-	
-								}// fim do handleAllResponses do comportamento Contract net
-							}// fim do if para ver se 
-*/						}// fim do if(deltaP<0) 
 					}else if(filtroInformMonitoramento.getContent().equals("1")){
 						System.out.println("Chave está fechada!!!!!!!");
 					}else{
