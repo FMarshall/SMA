@@ -14,6 +14,7 @@
  * SOC : estado da carga (ou do inglês, State of Charge)-
  ************************************************************************************************************/
 
+import jade.core.AID;
 import jade.core.Agent;
 //import java.util.Iterator;
 import jade.lang.acl.ACLMessage; //Relacionada a endereçoes
@@ -24,10 +25,16 @@ import jade.lang.acl.MessageTemplate; // Para uso dos filtros
 
 import jade.core.behaviours.TickerBehaviour;
 import jade.proto.SubscriptionResponder;
+import jade.proto.ContractNetResponder;
+import jade.domain.FIPANames;
+import jade.domain.FIPAAgentManagement.NotUnderstoodException;
+import jade.domain.FIPAAgentManagement.RefuseException;
+import jade.domain.FIPAAgentManagement.FailureException;
 //As bibliotecas abaixo foram exigidas no decorrer do SubscriptionResponder
 //import jade.domain.FIPAAgentManagement.FailureException;
 //import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 //import jade.domain.FIPAAgentManagement.RefuseException;
+
 
 
 
@@ -44,6 +51,7 @@ import org.jdom2.input.SAXBuilder; //This package support classes for building J
 
 
 
+
 //Foram incluídas automaticamente
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +59,8 @@ import java.io.IOException;
 //import java.util.List; //Trantando com lista
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 
 public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento" que por sua vez é uma subclasse
 									// da classe "Agent"
@@ -68,7 +78,9 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		MessageTemplate filtroSubscribe = MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE);
-		
+		MessageTemplate filtroContractNet = MessageTemplate.and(
+				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
+				MessageTemplate.MatchPerformative(ACLMessage.CFP) );
 		
 //		System.out.println(".:: Agente PCC APCC1 iniciado com sucesso! ::.\n");
 //		System.out.println("Todas as minhas informações: \n" +getAID());
@@ -132,30 +144,59 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 			} // fim do onTick 
 		}); //fim do comportamento temporal TickerBehaviour
 		
-	
-		/********************************************************************************************************************** 
-		 *		 Parte do FIPA Subscribe participante para receeber solicitação do APC para
-		 *informar o valor de potência que está sendo gerada pela geração intermitente
-		 **********************************************************************************************************************/
-		
-		addBehaviour(new SubscriptionResponder(this, filtroSubscribe) {
+		addBehaviour(new ContractNetResponder(this, filtroContractNet) {
+			
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
 
-			protected ACLMessage handleSubscription(ACLMessage subscription){
-				ACLMessage resposta = subscription.createReply();
-				String Potencia = agenteAABD.getChild("pontos_medida").getChildText("potencia");
-				resposta.setContent(Potencia);
-				resposta.setPerformative(ACLMessage.AGREE);
-				
-				return resposta;
-			}//fim de handleSubscription
-			
-		});	//Fim do SubscriptionResponder
-	} // fim do public void setup
+			protected ACLMessage handleCfp(ACLMessage cfp) throws NotUnderstoodException, RefuseException {
+//				System.out.println("Agent "+getLocalName()+": CFP received from "+cfp.getSender().getName()+". Action is "+cfp.getContent());
+				exibirMensagem(cfp);
+							
+//				valorSOC = Double.parseDouble(((Element) agenteAABD.getContent()).getText());
+				double valorSOC = Double.parseDouble(agenteAABD.getChild("soc").getText());
+								
+				if (valorSOC > 80) {
+					// We provide a proposal
+//					System.out.println("Agent "+getLocalName()+": Proposing "+proposal);
+					exibirAviso(myAgent, "Aceito a solicitação de deltaP igual a: "+cfp.getContent());
+					ACLMessage propose = cfp.createReply();
+					propose.setPerformative(ACLMessage.PROPOSE);
+					propose.setContent(String.valueOf(valorSOC));
+					return propose;
+				}
+				else {
+					// We refuse to provide a proposal
+//					System.out.println("Agent "+getLocalName()+": Refuse");
+					exibirAviso(myAgent, "Recusei o pedido de deltaP");
+					throw new RefuseException("evaluation-failed");
+				}
+			}
 
+			protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose,ACLMessage accept) throws FailureException {
+//				System.out.println("Agent "+getLocalName()+": Proposal accepted");
+//				if (performAction()) {
+//					System.out.println("Agent "+getLocalName()+": Action successfully performed");
+					ACLMessage inform = accept.createReply();
+					inform.setPerformative(ACLMessage.INFORM);
+					return inform;
+//				}
+//				else {
+//					System.out.println("Agent "+getLocalName()+": Action execution failed");
+//					throw new FailureException("unexpected-error");
+//				}	
+			}
+
+			protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
+				System.out.println("Agent "+getLocalName()+": Proposal rejected");
+			}
+		} );
+	
+		
+	} // fim do public void setup
+	
 	/**
 	 * Método para exibição de mensagens ACL
 	 *  @param msg recebe uma mensagem to tipo ALCMessage

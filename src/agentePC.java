@@ -278,7 +278,7 @@ public class agentePC extends Agent { /**
 								 */
 								exibirAviso(myAgent, "Entrei dentro do if do deltaP");
 								/*********************************************************************************
-								 * FIPA Contract Net Initiator para negocia��o com outros ALs [1]
+								 * FIPA Contract Net Initiator para negociação com dispositivos de armazenamento
 								*********************************************************************************/
 								final ACLMessage negociarDeltaP = new ACLMessage(ACLMessage.CFP);
 								List lista3 = agenteApcBD.getChild("agentesArmazenamento").getChildren(); 
@@ -295,6 +295,7 @@ public class agentePC extends Agent { /**
 							    	}
 							    }		
 							    negociarDeltaP.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+							    deltaP = Math.abs(deltaP); //módulo de deltaP
 							    negociarDeltaP.setContent(String.valueOf(deltaP)); 
 							    
 							    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
@@ -307,9 +308,9 @@ public class agentePC extends Agent { /**
 									}
 									
 									protected void handleRefuse(ACLMessage refuse) {
-										System.out.println(getLocalName() + ": Negociação recusada por " + refuse.getSender().getLocalName());
+										exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
 
-////										System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
+////									System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
 //										
 //										ACLMessage aviso = negociarDeltaP.createReply();
 //										aviso.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
@@ -322,7 +323,7 @@ public class agentePC extends Agent { /**
 									protected void handleFailure(ACLMessage failure) {
 										if (failure.getSender().equals(myAgent.getAMS())) {
 											// Notificação de erro feita pela plataforma
-											System.out.println("N�o existe outros agentes ALs");
+											System.out.println("Não existe outros agentes ALs");
 										}
 										else {
 											System.out.println("-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
