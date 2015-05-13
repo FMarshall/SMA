@@ -39,7 +39,9 @@ import org.jdom2.input.SAXBuilder; //This package support classes for building J
 //import org.jdom2.Attribute;
 
 
-
+import java.util.Date;
+import java.util.Vector;
+import java.util.Enumeration;
 
 
 
@@ -302,9 +304,9 @@ public class agentePC extends Agent { /**
 									
 									protected void handlePropose(ACLMessage propose, Vector v) {
 										
-										ACLMessage reply = propose.createReply();
-										reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-										v.addElement(reply);
+//										ACLMessage reply = propose.createReply();
+//										reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//										v.addElement(reply);
 									}
 									
 									protected void handleRefuse(ACLMessage refuse) {
@@ -327,14 +329,42 @@ public class agentePC extends Agent { /**
 										}
 										else {
 											System.out.println("-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
-										}
-										// Immediate failure --> we will not receive a response from this agent
-									}
+										}										
+									} //Fim do handleFailure
 									
 									protected void handleAllResponses(Vector responses, Vector acceptances) {
 //										ACLMessage reply = responses.createReply();
 //										reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
 //										reply.setContent("");
+										
+										// Evaluate proposals.
+										double bestProposal = -1;
+										AID bestProposer = null;
+										ACLMessage accept = null;
+										
+										Enumeration e = responses.elements();  //a variável e será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
+										while (e.hasMoreElements()) { //um while só pra percorrer todas as posições do vetor "e"
+											ACLMessage msg = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida 
+											
+											if (msg.getPerformative() == ACLMessage.PROPOSE) { //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
+												ACLMessage reply = msg.createReply(); //será criada então uma resposta para essa mensagem
+												reply.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+												
+												acceptances.addElement(reply);
+												double proposal = Double.parseDouble(msg.getContent()); //Aqui ele pega a propostas para avaliá-la
+												if (proposal > bestProposal) {
+													bestProposal = proposal;
+													bestProposer = msg.getSender();
+													accept = reply;
+												}
+											}//Fim do if msg.getPErformative() == ACLMessage.PROPOSE
+										}
+										// Accept the proposal of the best proposer
+										if (accept != null) {
+											System.out.println("Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
+											accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+										}	
+										
 						
 									}// Fim do handle all responses
 								}); //Fim do contract net initiator

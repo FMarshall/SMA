@@ -164,7 +164,8 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 					exibirAviso(myAgent, "Aceito a solicitação de deltaP igual a: "+cfp.getContent());
 					ACLMessage propose = cfp.createReply();
 					propose.setPerformative(ACLMessage.PROPOSE);
-					propose.setContent(String.valueOf(valorSOC));
+//					propose.setContent(String.valueOf(valorSOC));
+					propose.setContent(cfp.getContent());
 					return propose;
 				}
 				else {
