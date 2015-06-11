@@ -4,8 +4,10 @@
  * @version 1.0
  * Descrição
  * Este é o comportamento do Agente do ponto de conexão (APC) 
- *
- * << Lista de Abreviaturas >>
+ * 
+ *               ▬▬▬▬▬▬▬▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬▬▬▬▬▬▬▬▬▬
+ * << ▓▓▓▒▒▒░░░  Lista de Abreviaturas ░░░▒▒▒▓▓▓ >>
+ *               
  * nomeAgente: variável que receberá o nome do agente em questão
  * Mensagem: variável que receberá a mensagem ACLMessage
  * BD: banco de dados
@@ -73,6 +75,7 @@ public class agentePC extends Agent { /**
 	
 	public void setup()
 	{
+				
 		final String nomeAgente = getLocalName(); //a variável "nomeAgente" recebe o nome local do agente 
 		final Element agenteApcBD = carregaBD(nomeAgente); //Chama o método carregaBD que carrega o BD do agente "nomeAgente"
 		
@@ -121,11 +124,11 @@ public class agentePC extends Agent { /**
 					 * Eu pus um delay porque primeiro o APC, AG e AA devem receber os dados do Matlab para somente depois 
 					 * o APC começar a analisar o balanço de energia e começar uma coordenação de tudo.
 					 */
-					try {
-					    Thread.sleep(10000);                 //Delay em milisegundos
-					} catch(InterruptedException ex) {
-					    Thread.currentThread().interrupt();
-					}
+//					try {
+//					    Thread.sleep(10000);                 //Delay em milisegundos
+//					} catch(InterruptedException ex) {
+//					    Thread.currentThread().interrupt();
+//					}
 					
 					/********************************************************************************
 					 * FIPA Subscribe Initiator para saber o valor de Potência dos dispositivos de geração intermitente
@@ -257,7 +260,11 @@ public class agentePC extends Agent { /**
 						    exibirAviso(myAgent, "A potência demandada total é: "+PotenciaDemandaTotal);
 						    deltaP = PotenciaGeracaoTotal - PotenciaDemandaTotal;
 						    exibirAviso(myAgent, "O balanço de potência atual é: "+deltaP);
-						    
+						   
+							PotenciaGeracaoTotal = 0;
+							PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
+							
+						    						    
 						    //Obs.: Por enquanto vou colocar valores aleatórios para cacular o balanço de potência na microrrede
 						    // Mas ai tenho que já ter uma base da potência da microrrede, das cargas...
 							
@@ -425,7 +432,11 @@ public class agentePC extends Agent { /**
 										}// fim do handleAllResponses do comportamento Contract net
 									}// fim do if para ver se
 									*/
+							    deltaP = 0;
+								PotenciaGeracaoTotal = 0;
+								PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
 								
+							    
 //								}//Fim do if deltaP<0
 								}else{
 									exibirAviso(myAgent, "Deu pau no deltaP");
@@ -433,8 +444,6 @@ public class agentePC extends Agent { /**
 				    	}
 				    });
 					
-				    
-
 				    
 				   
 					
@@ -444,13 +453,15 @@ public class agentePC extends Agent { /**
 						System.out.println("Deu pau!");
 					}
 				
-				
-				
-				
+//					deltaP = PotenciaGeracaoTotal = PotenciaDemandaTotal= 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
+
+//					deltaP = 0;
+//					PotenciaGeracaoTotal = 0;
+//					PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
+					
 			}// fim o if para saber se inform != null
 			} // fim do onTick 
 		}); //fim do comportamento temporal TickerBehaviour
-		
 		
 		
 

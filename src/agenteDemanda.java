@@ -180,8 +180,10 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 				
 				resposta.setContent(String.valueOf(potenciaTotalCargas));
 				resposta.setPerformative(ACLMessage.AGREE);
+				potenciaTotalCargas = 0; //Como já setei o conteúdo da resposta, posso zerar a variável.
 				
 				return resposta;
+				
 			}//fim de handleSubscription
 			
 		});	//Fim do SubscriptionResponder

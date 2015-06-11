@@ -77,7 +77,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-		MessageTemplate filtroSubscribe = MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE);
+		
 		MessageTemplate filtroContractNet = MessageTemplate.and(
 				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
 				MessageTemplate.MatchPerformative(ACLMessage.CFP) );
@@ -94,8 +94,9 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 //			System.out.println("- "+it.next());
 //		}
 		/**
-		 * Este comportamente temporial é somente para aquisição de dados do matlab, no caso, de um sistema de geração
-		 * intermitente. 
+		 * Este comportamente temporal se divide em duas partes:
+		 * Parte 1 (medição) - Aquisição de dados do matlab, no caso, de um sistema de armazenamento do tipo bateria
+		 * Parte 2 (comando) - Leitura do XML para comando de chaves e modo de atuação (fonte de corrente ou tensão) 
 		 */
 		addBehaviour(new TickerBehaviour(this,100) {
 			/**
@@ -114,6 +115,15 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 				if(filtro_Inform!=null){	
 					exibirMensagem(filtro_Inform);
 					
+					/**
+					 * Método para fazer o teste de conexão com o matlab para entender o código em matlab
+					 *******************************/
+//					ACLMessage msg = filtro_Inform.createReply();
+////					msg.setContent("ok");
+//					msg.setContent("um/dois/tres");
+//					send(msg);
+					//******************************
+					
 //					if(filtro_Inform.getContent().equals("0")) {
 //						System.out.println("Chave está aberta!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 //					}else if(filtro_Inform.getContent().equals("1")){
@@ -122,24 +132,31 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 //						System.out.println("Deu pau!");
 //					}
 					
+					/*
+					 * Parte de medição e aquisição de dados e armazenamento no XML
+					 */
 					String conteudo = filtro_Inform.getContent();  //Pego o conteudo da mensagem
-					String SOC = conteudo.split("/")[0]; /*A mensagem é no formato:  "SOC/estado da chave". Foi aplicado o método split para quebrar o "conteudo" em 
-					array sendo a separação definida pelo caracter "/". Da separação eu peguei a posição 0 da array que corresponde a potencia gerada pelo dispositivo monitorado.*/
-//					System.out.println("A referencia da carga é: "+refCarga); //Só pra testar se tava dando certo
+					String SOC = conteudo.split("/")[0]; /* A mensagem é no formato:  "SOC/estado da chave/modo atuação". Foi aplicado o método split para quebrar o "conteudo" em 
+					array sendo a separação definida pelo caracter "/". // Da separação eu peguei a posição 0 da array que corresponde ao SOC do dispositivo monitorado.*/
 					String estadoChave = conteudo.split("/")[1];
+					String modoAtuacao = conteudo.split("/")[2];
 					
-					agenteAABD.getChild("soc").setText(SOC);	//seta o XML do agente atualizando o valor da SOC
-					agenteAABD.getChild("estadoChave").setText(estadoChave); //seta o XML do agente atualizando o estado da chave
+					agenteAABD.getChild("medidasAtuais").getChild("soc").setText(SOC);	//seta o XML do agente atualizando o valor da SOC
+					agenteAABD.getChild("medidasAtuais").getChild("estadoChave").setText(estadoChave); //seta o XML do agente atualizando o estado da chave
+					agenteAABD.getChild("medidasAtuais").getChild("status").setText(modoAtuacao); //seta no XML se é modo corrente ou modo tensão. "0": modo corrente; "1" modo tensão
 					
-					/*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
-					/* Essa parte é opcional. Creio que não seja necessário responder ao matlab que deu certo.
-					 * ACLMessage resposta = filtro_Inform.createReply();
-					resposta.setPerformative(ACLMessage.AGREE);
-					resposta.setContent("Recebido!");
-					myAgent.send(resposta);*/
+					/*
+					 * Parte de consulta ao XML e comando
+					 * O camando será enviado como resposta ao inform da medição. São aproveitadas 2 das variáveis anteriores 
+					 */
+					estadoChave = agenteAABD.getChild("comando").getChild("estadoChave").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
+					modoAtuacao = agenteAABD.getChild("comando").getChildText("status"); //consulta no XML o modo de atuação
+					String Pbat = agenteAABD.getChild("comando").getChildText("Pbat"); // valor da potência gerada quando estiver no modo fonte de correte
 					
-//					agenteApcBD.getChild("estado").setText("aberta");
-					//teste/////
+					ACLMessage msg = filtro_Inform.createReply();
+					msg.setContent(estadoChave+"/"+modoAtuacao+"/"+Pbat); //A mensagem será no formato "estadoChave/modoAtuacao/Pbat"
+					send(msg);  //enviando a mensagem de resposta do Inform ao Matlalb
+					
 				}// fim o if para saber se inform != null
 			} // fim do onTick 
 		}); //fim do comportamento temporal TickerBehaviour
@@ -156,7 +173,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 				exibirMensagem(cfp);
 							
 //				valorSOC = Double.parseDouble(((Element) agenteAABD.getContent()).getText());
-				double valorSOC = Double.parseDouble(agenteAABD.getChild("soc").getText());
+				double valorSOC = Double.parseDouble(agenteAABD.getChild("medidasAtuais").getChild("soc").getText());
 								
 				if (valorSOC > 80) {
 					// We provide a proposal
@@ -182,6 +199,11 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 //					System.out.println("Agent "+getLocalName()+": Action successfully performed");
 					ACLMessage inform = accept.createReply();
 					inform.setPerformative(ACLMessage.INFORM);
+					
+					//Antes eu dou uma atualizada no XML
+					agenteAABD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
+					agenteAABD.getChild("comando").getChild("status").setText("0"); //seta no XML o modo de tensão pois no matlab tem um NOT que enviará 1 para a fonte de tensão
+					
 					return inform;
 //				}
 //				else {
@@ -194,8 +216,6 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 				System.out.println("Agent "+getLocalName()+": Proposal rejected");
 			}
 		} );
-	
-		
 	} // fim do public void setup
 	
 	/**
