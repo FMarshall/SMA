@@ -35,10 +35,6 @@ import jade.domain.FIPAAgentManagement.FailureException;
 //import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 //import jade.domain.FIPAAgentManagement.RefuseException;
 
-
-
-
-
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -46,10 +42,6 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
-
-
-
-
 
 
 //Foram incluídas automaticamente
@@ -76,8 +68,12 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		final Element agenteAABD = carregaBD(nomeAgente); //Chama o método carregaBD que carrega o BD do agente "nomeAgente"
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
-		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+		final MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		
+//		final MessageTemplate filtroInformMonitoramento = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchSender(getAID().getLocalName()); 
+			
+//		tcpAA1@192.168.1.6:1099/JADE
+//		AA1@192.168.1.6:1099/JADE
 		MessageTemplate filtroContractNet = MessageTemplate.and(
 				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
 				MessageTemplate.MatchPerformative(ACLMessage.CFP) );
@@ -106,27 +102,27 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 
 			public void onTick(){
 
-				ACLMessage filtro_Inform = receive(); /*o intuito dessa mensagem é a monitoração do SOC e chave 
+				ACLMessage msg = receive(filtroInformMonitoramento); /*o intuito dessa mensagem é a monitoração do SOC e chave 
 				                                      do dispositivo de armazenamento monitorado*/
 				//String conteudo = mensagem.getContent();
 
 				//if(msg_curto!=null && msg_curto.getContent()=="curto"){
 				//if(msg_curto!=null && conteudo=="curto"){
-				if(filtro_Inform!=null){	
-					exibirMensagem(filtro_Inform);
+				if(msg!=null){	
+					exibirMensagem(msg);
 					
 					/**
 					 * Método para fazer o teste de conexão com o matlab para entender o código em matlab
 					 *******************************/
-//					ACLMessage msg = filtro_Inform.createReply();
+//					ACLMessage msg = msg.createReply();
 ////					msg.setContent("ok");
 //					msg.setContent("um/dois/tres");
 //					send(msg);
 					//******************************
 					
-//					if(filtro_Inform.getContent().equals("0")) {
+//					if(msg.getContent().equals("0")) {
 //						System.out.println("Chave está aberta!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-//					}else if(filtro_Inform.getContent().equals("1")){
+//					}else if(msg.getContent().equals("1")){
 //						System.out.println("Chave está fechada!!!!!!!");
 //					}else{
 //						System.out.println("Deu pau!");
@@ -135,10 +131,13 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 					/*
 					 * Parte de medição e aquisição de dados e armazenamento no XML
 					 */
-					String conteudo = filtro_Inform.getContent();  //Pego o conteudo da mensagem
+					String conteudo = msg.getContent();  //Pego o conteudo da mensagem
+					exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+conteudo);
+					
 					String SOC = conteudo.split("/")[0]; /* A mensagem é no formato:  "SOC/estado da chave/modo atuação". Foi aplicado o método split para quebrar o "conteudo" em 
 					array sendo a separação definida pelo caracter "/". // Da separação eu peguei a posição 0 da array que corresponde ao SOC do dispositivo monitorado.*/
 					String estadoChave = conteudo.split("/")[1];
+//					exibirAviso(myAgent, "O estado da minha chave é: "+estadoChave);
 					String modoAtuacao = conteudo.split("/")[2];
 					
 					agenteAABD.getChild("medidasAtuais").getChild("soc").setText(SOC);	//seta o XML do agente atualizando o valor da SOC
@@ -153,9 +152,9 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 					modoAtuacao = agenteAABD.getChild("comando").getChildText("status"); //consulta no XML o modo de atuação
 					String Pbat = agenteAABD.getChild("comando").getChildText("Pbat"); // valor da potência gerada quando estiver no modo fonte de correte
 					
-					ACLMessage msg = filtro_Inform.createReply();
-					msg.setContent(estadoChave+"/"+modoAtuacao+"/"+Pbat); //A mensagem será no formato "estadoChave/modoAtuacao/Pbat"
-					send(msg);  //enviando a mensagem de resposta do Inform ao Matlalb
+					ACLMessage resposta = msg.createReply();
+					resposta.setContent(estadoChave+"/"+modoAtuacao+"/"+Pbat); //A mensagem será no formato "estadoChave/modoAtuacao/Pbat"
+					send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
 					
 				}// fim o if para saber se inform != null
 			} // fim do onTick 
@@ -214,6 +213,8 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 
 			protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
 				System.out.println("Agent "+getLocalName()+": Proposal rejected");
+				
+				
 			}
 		} );
 	} // fim do public void setup
@@ -227,6 +228,8 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		System.out.println("\n\n===============<<MENSAGEM>>==================");    	
 		System.out.println("De: " + msg.getSender());
 		System.out.println("Para: " + this.getName());
+		System.out.println("Performativa: "+msg.getPerformative());
+		System.out.println("Protocolo: "+msg.getProtocol());
 		System.out.println("Conteudo: " + msg.getContent());
 		
 		Calendar cal = Calendar.getInstance();

@@ -81,6 +81,8 @@ public class agentePC extends Agent { /**
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+//		MessageTemplate filtroInformMonitoramento = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchContent(value));
+		
 		
 //		System.out.println(".:: Agente PCC APCC1 iniciado com sucesso! ::.\n");
 //		System.out.println("Todas as minhas informações: \n" +getAID());
@@ -95,6 +97,11 @@ public class agentePC extends Agent { /**
 //		}
 
 		addBehaviour(new TickerBehaviour(this,100) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void onTick(){
 
 				ACLMessage filtroInformMonitoramento = receive();
@@ -310,6 +317,7 @@ public class agentePC extends Agent { /**
 							    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
 									
 									protected void handlePropose(ACLMessage propose, Vector v) {
+										exibirMensagem(propose);
 										
 //										ACLMessage reply = propose.createReply();
 //										reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -332,10 +340,10 @@ public class agentePC extends Agent { /**
 									protected void handleFailure(ACLMessage failure) {
 										if (failure.getSender().equals(myAgent.getAMS())) {
 											// Notificação de erro feita pela plataforma
-											System.out.println("Não existe outros agentes ALs");
+											exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
 										}
 										else {
-											System.out.println("-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+											exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
 										}										
 									} //Fim do handleFailure
 									
@@ -349,9 +357,9 @@ public class agentePC extends Agent { /**
 										AID bestProposer = null;
 										ACLMessage accept = null;
 										
-										Enumeration e = responses.elements();  //a variável e será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
+										Enumeration e = responses.elements();  //a variável "e" será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
 										while (e.hasMoreElements()) { //um while só pra percorrer todas as posições do vetor "e"
-											ACLMessage msg = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida 
+											ACLMessage msg = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
 											
 											if (msg.getPerformative() == ACLMessage.PROPOSE) { //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
 												ACLMessage reply = msg.createReply(); //será criada então uma resposta para essa mensagem
@@ -368,7 +376,7 @@ public class agentePC extends Agent { /**
 										}
 										// Accept the proposal of the best proposer
 										if (accept != null) {
-											System.out.println("Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
+											exibirAviso(myAgent,"Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
 											accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
 										}	
 										
@@ -439,7 +447,7 @@ public class agentePC extends Agent { /**
 							    
 //								}//Fim do if deltaP<0
 								}else{
-									exibirAviso(myAgent, "Deu pau no deltaP");
+									exibirAviso(myAgent, "deltaP é maior que zero (deltaP>0).");
 								}
 				    	}
 				    });
@@ -448,9 +456,10 @@ public class agentePC extends Agent { /**
 				   
 					
 					}else if(filtroInformMonitoramento.getContent().equals("1")){
-						System.out.println("Chave está fechada!!!!!!!");
+						exibirAviso(myAgent, "O PCC está fechado!");
+						
 					}else{
-						System.out.println("Deu pau!");
+						exibirAviso(myAgent, "O PCC não está acusando nem 0 nem 1!! Problema");
 					}
 				
 //					deltaP = PotenciaGeracaoTotal = PotenciaDemandaTotal= 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
@@ -480,6 +489,8 @@ public class agentePC extends Agent { /**
 		System.out.println("\n\n===============<<MENSAGEM>>==================");    	
 		System.out.println("De: " + msg.getSender());
 		System.out.println("Para: " + this.getName());
+		System.out.println("Performativa: "+msg.getPerformative());
+		System.out.println("Protocolo: "+msg.getProtocol());
 		System.out.println("Conteudo: " + msg.getContent());
 		
 		Calendar cal = Calendar.getInstance();

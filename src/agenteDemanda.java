@@ -31,10 +31,6 @@ import jade.proto.SubscriptionResponder;
 //import jade.domain.FIPAAgentManagement.RefuseException;
 
 
-
-
-
-
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -42,11 +38,6 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
-
-
-
-
-
 
 
 //Foram incluídas automaticamente
@@ -72,7 +63,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 		final Element agenteADBD = carregaBD(nomeAgente); //Chama o método carregaBD que carrega o BD do agente "nomeAgente"
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
-		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+		final MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		MessageTemplate filtroSubscribe = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE),MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE)); 
 		
 		
@@ -99,24 +90,26 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 
 			public void onTick(){
 
-				ACLMessage filtro_Inform = receive(); /*o intuito dessa mensagem é a monitoração da potência e chave 
+				
+				
+				ACLMessage msg = receive(filtroInformMonitoramento); /*o intuito dessa mensagem é a monitoração da potência e chave 
 				                                      da geração intermitente monitorada*/
 				//String conteudo = mensagem.getContent();
 
 				//if(msg_curto!=null && msg_curto.getContent()=="curto"){
 				//if(msg_curto!=null && conteudo=="curto"){
-				if(filtro_Inform!=null){	
-					exibirMensagem(filtro_Inform);
+				if(msg!=null){	
+					exibirMensagem(msg);
 					
-//					if(filtro_Inform.getContent().equals("0")) {
+//					if(msg.getContent().equals("0")) {
 //						System.out.println("Chave está aberta!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-//					}else if(filtro_Inform.getContent().equals("1")){
+//					}else if(msg.getContent().equals("1")){
 //						System.out.println("Chave está fechada!!!!!!!");
 //					}else{
 //						System.out.println("Deu pau!");
 //					}
 					
-					String conteudo = filtro_Inform.getContent();  //Pego o conteudo da mensagem
+					String conteudo = msg.getContent();  //Pego o conteudo da mensagem
 					
 					String valorCarga = conteudo.split("/")[0]; // Valor da carga demandada
 					String estadoChave = conteudo.split("/")[1]; // Estado da chave
@@ -128,7 +121,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 					
 					/*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
 					/* Essa parte é opcional. Creio que não seja necessário responder ao matlab que deu certo.
-					 * ACLMessage resposta = filtro_Inform.createReply();
+					 * ACLMessage resposta = msg.createReply();
 					resposta.setPerformative(ACLMessage.AGREE);
 					resposta.setContent("Recebido!");
 					myAgent.send(resposta);*/
@@ -198,6 +191,8 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 		System.out.println("\n\n===============<<MENSAGEM>>==================");    	
 		System.out.println("De: " + msg.getSender());
 		System.out.println("Para: " + this.getName());
+		System.out.println("Performativa: "+msg.getPerformative());
+		System.out.println("Protocolo: "+msg.getProtocol());
 		System.out.println("Conteudo: " + msg.getContent());
 		
 		Calendar cal = Calendar.getInstance();
