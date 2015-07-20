@@ -24,7 +24,10 @@ import jade.lang.acl.MessageTemplate; // Para uso dos filtros
 //import jade.core.behaviours.CyclicBehaviour; //Para comportamento temporal
 
 import jade.core.behaviours.TickerBehaviour;
+import jade.proto.AchieveREResponder;
 import jade.proto.SubscriptionResponder;
+
+
 import jade.proto.ContractNetResponder;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
@@ -35,6 +38,7 @@ import jade.domain.FIPAAgentManagement.FailureException;
 //import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 //import jade.domain.FIPAAgentManagement.RefuseException;
 
+
 //Bibliotecas para lidar com arquivos XML
 //import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -42,6 +46,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
+
 
 
 //Foram incluídas automaticamente
@@ -70,6 +75,9 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		final MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		
+		final MessageTemplate filtroIlha = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+		  		MessageTemplate.MatchContent("ilhou")); 
+		
 //		final MessageTemplate filtroInformMonitoramento = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchSender(getAID().getLocalName()); 
 			
 //		tcpAA1@192.168.1.6:1099/JADE
@@ -94,7 +102,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		 * Parte 1 (medição) - Aquisição de dados do matlab, no caso, de um sistema de armazenamento do tipo bateria
 		 * Parte 2 (comando) - Leitura do XML para comando de chaves e modo de atuação (fonte de corrente ou tensão) 
 		 */
-		addBehaviour(new TickerBehaviour(this,100) {
+		addBehaviour(new TickerBehaviour(this,100){
 			/**
 			 * 
 			 */
@@ -173,7 +181,8 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 							
 //				valorSOC = Double.parseDouble(((Element) agenteAABD.getContent()).getText());
 				double valorSOC = Double.parseDouble(agenteAABD.getChild("medidasAtuais").getChild("soc").getText());
-								
+				exibirAviso(myAgent, "O SOC está em "+valorSOC);
+				
 				if (valorSOC > 80) {
 					// We provide a proposal
 //					System.out.println("Agent "+getLocalName()+": Proposing "+proposal);
@@ -188,7 +197,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 					// We refuse to provide a proposal
 //					System.out.println("Agent "+getLocalName()+": Refuse");
 					exibirAviso(myAgent, "Recusei o pedido de deltaP");
-					throw new RefuseException("evaluation-failed");
+					throw new RefuseException("O SOC da bateria está abaixo de SOC!");
 				}
 			}
 
@@ -216,7 +225,59 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 				
 				
 			}
-		} );
+		} ); //Fim do comportamento contract net
+		
+		/**
+		 * FIPA Request Responder para responder a solicitação do APC para ilhar
+		 */
+		addBehaviour(new AchieveREResponder(this, filtroIlha) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+//				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+				ACLMessage resposta = request.createReply();
+				
+//				if (checkAction()) {
+//					// We agree to perform the action. Note that in the FIPA-Request
+//					// protocol the AGREE message is optional. Return null if you
+//					// don't want to send it.
+//					System.out.println("Agent "+getLocalName()+": Agree");
+//					ACLMessage agree = request.createReply();
+//					agree.setPerformative(ACLMessage.AGREE);
+//					return agree;
+//				}
+//				else {
+//					// We refuse to perform the action
+//					System.out.println("Agent "+getLocalName()+": Refuse");
+//					throw new RefuseException("check-failed");
+//				}
+				
+				//Antes eu dou uma atualizada no XML
+				agenteAABD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
+				agenteAABD.getChild("comando").getChild("status").setText("0"); //seta no XML o modo de tensão pois no matlab tem um NOT que enviará 1 para a fonte de tensão
+				
+				resposta.setContent("Ok");
+				resposta.setPerformative(ACLMessage.AGREE);
+				return resposta;
+			}
+		} );//Fim do request responder 
+		
+//			protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
+//				if (performAction()) {
+//					System.out.println("Agent "+getLocalName()+": Action successfully performed");
+//					ACLMessage inform = request.createReply();
+//					inform.setPerformative(ACLMessage.INFORM);
+//					return inform;
+//				}
+//				else {
+//					System.out.println("Agent "+getLocalName()+": Action failed");
+//					throw new FailureException("unexpected-error");
+//				}	
+//			}
 	} // fim do public void setup
 	
 	/**
@@ -225,7 +286,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 	 *  
 	 */
 	public void exibirMensagem(ACLMessage msg) {
-		System.out.println("\n\n===============<<MENSAGEM>>==================");    	
+		System.out.println("\n\n===============<<MENSAGEM>>=====2=============");    	
 		System.out.println("De: " + msg.getSender());
 		System.out.println("Para: " + this.getName());
 		System.out.println("Performativa: "+msg.getPerformative());

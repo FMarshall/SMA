@@ -24,11 +24,15 @@ import jade.lang.acl.MessageTemplate; // Para uso dos filtros
 
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
+
 import jade.proto.SubscriptionResponder;
+
 //As bibliotecas abaixo foram exigidas no decorrer do SubscriptionResponder
 //import jade.domain.FIPAAgentManagement.FailureException;
 //import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 //import jade.domain.FIPAAgentManagement.RefuseException;
+
+
 
 
 //Bibliotecas para lidar com arquivos XML
@@ -38,6 +42,8 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
+
+
 
 
 //Foram incluídas automaticamente
@@ -64,6 +70,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		final MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+		
 		MessageTemplate filtroSubscribe = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE),MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE)); 
 		
 		
@@ -180,6 +187,12 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 			}//fim de handleSubscription
 			
 		});	//Fim do SubscriptionResponder
+		
+		
+		
+		
+		
+		
 	} // fim do public void setup
 
 	/**

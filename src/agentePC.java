@@ -22,6 +22,7 @@ import jade.core.AID;    //Relacionada a endereços
 import jade.lang.acl.MessageTemplate; // Para uso dos filtros
 
 //Protocolos de comunicação
+import jade.proto.AchieveREInitiator;
 import jade.proto.SubscriptionInitiator;
 import jade.domain.FIPANames; //Foi solicitado no protocolo suscribe 
 import jade.proto.ContractNetInitiator;
@@ -80,8 +81,8 @@ public class agentePC extends Agent { /**
 		final Element agenteApcBD = carregaBD(nomeAgente); //Chama o método carregaBD que carrega o BD do agente "nomeAgente"
 		
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
-		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-//		MessageTemplate filtroInformMonitoramento = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchContent(value));
+//		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+		final MessageTemplate filtroInformMonitoramento = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchSender(getAID("tcpACP1")));
 		
 		
 //		System.out.println(".:: Agente PCC APCC1 iniciado com sucesso! ::.\n");
@@ -96,6 +97,7 @@ public class agentePC extends Agent { /**
 //			System.out.println("- "+it.next());
 //		}
 
+		
 		addBehaviour(new TickerBehaviour(this,100) {
 			/**
 			 * 
@@ -104,20 +106,20 @@ public class agentePC extends Agent { /**
 
 			public void onTick(){
 
-				ACLMessage filtroInformMonitoramento = receive();
+				ACLMessage msg = receive(filtroInformMonitoramento);
 				//String conteudo = mensagem.getContent();
 
 				//if(msg_curto!=null && msg_curto.getContent()=="curto"){
 				//if(msg_curto!=null && conteudo=="curto"){
-				if(filtroInformMonitoramento!=null){	
-					exibirMensagem(filtroInformMonitoramento);
-					String cr = filtroInformMonitoramento.getContent();
+				if(msg!=null){	
+					exibirMensagem(msg);
+					String cr = msg.getContent();
 					
 					if(cr.equals("0")) {
 
 					exibirAviso(myAgent,"O PCC está aberto!"); //Só pra ver se deu certo
 					
-					agenteApcBD.getChild("cr").setText(filtroInformMonitoramento.getContent()); //Seta no XML o CR
+					agenteApcBD.getChild("cr").setText(msg.getContent()); //Seta no XML o CR
 					//Ao receber a mensagem Inform do estado do PCC, não é necessário responder a mensagem
 //						ACLMessage resposta = filtro_Inform.createReply();
 //						resposta.setPerformative(ACLMessage.AGREE);
@@ -136,6 +138,58 @@ public class agentePC extends Agent { /**
 //					} catch(InterruptedException ex) {
 //					    Thread.currentThread().interrupt();
 //					}
+					
+					
+					/**
+				     * Protocolo FIPA Request para solicitar que o dispositivo de armazenamento atue fechando sua chave e servindo de fonte de tensão
+				     * 
+				     */
+			  		ACLMessage msg1 = new ACLMessage(ACLMessage.REQUEST);
+			  		msg1.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+				  		
+			  		//Cria-se uma lista para percorrer a tag agentesArmazenamento e ver seus elementos
+			  		List lista3 = agenteApcBD.getChild("agentesArmazenamento").getChildren(); 
+					Iterator i3 = lista3.iterator();
+					
+				    while(i3.hasNext()) { 
+				    	Element elemento = (Element) i3.next();
+				    	String nome = String.valueOf(elemento.getName());
+						
+				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes de armazenamento no XML, então add ele como remetente
+//									System.out.println("Entrou no if!!!!!");  //Só pra testar
+				    		exibirAviso(myAgent, "Solicitando a "+nome+"que atue como fonte de tensão.");
+				    		msg1.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+				    	}
+				    }		
+				  
+				    msg1.setContent("ilhou");
+			  		
+			  		addBehaviour(new AchieveREInitiator(myAgent, msg1) {
+						protected void handleInform(ACLMessage inform) {
+							System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+						}
+						protected void handleRefuse(ACLMessage refuse) {
+//							System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
+//							nResponders--;
+						}
+						protected void handleFailure(ACLMessage failure) {
+							if (failure.getSender().equals(myAgent.getAMS())) {
+								// FAILURE notification from the JADE runtime: the receiver
+								// does not exist
+								System.out.println("Responder does not exist");
+							}
+							else {
+								System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+							}
+						}
+						protected void handleAllResultNotifications(Vector notifications) {
+//							if (notifications.size() < nResponders) {
+//								// Some responder didn't reply within the specified timeout
+//								System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
+//							}
+						}
+					}); //Fim do addBehaviour do request initiator
+					
 					
 					/********************************************************************************
 					 * FIPA Subscribe Initiator para saber o valor de Potência dos dispositivos de geração intermitente
@@ -300,7 +354,7 @@ public class agentePC extends Agent { /**
 								List lista3 = agenteApcBD.getChild("agentesArmazenamento").getChildren(); 
 								Iterator i3 = lista3.iterator();
 								
-							    while(i3.hasNext()) {
+							    while(i3.hasNext()) 				{
 							    	Element elemento = (Element) i3.next();
 							    	String nome = String.valueOf(elemento.getName());
 									
@@ -354,92 +408,48 @@ public class agentePC extends Agent { /**
 										
 										// Evaluate proposals.
 										double bestProposal = -1;
-										AID bestProposer = null;
+//										AID bestProposer = null;
 										ACLMessage accept = null;
 										
 										Enumeration e = responses.elements();  //a variável "e" será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
 										while (e.hasMoreElements()) { //um while só pra percorrer todas as posições do vetor "e"
-											ACLMessage msg = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
+											ACLMessage msgProposta = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
 											
-											if (msg.getPerformative() == ACLMessage.PROPOSE) { //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
-												ACLMessage reply = msg.createReply(); //será criada então uma resposta para essa mensagem
-												reply.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+											if (msgProposta.getPerformative() == ACLMessage.PROPOSE) { //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
+												ACLMessage resposta = msgProposta.createReply(); //será criada então uma resposta para essa mensagem
+												acceptances.addElement(resposta);
 												
-												acceptances.addElement(reply);
-												double proposal = Double.parseDouble(msg.getContent()); //Aqui ele pega a propostas para avaliá-la
+												double proposal = Double.parseDouble(msgProposta.getContent()); //Aqui ele pega a propostas para avaliá-la
 												if (proposal > bestProposal) {
 													bestProposal = proposal;
-													bestProposer = msg.getSender();
-													accept = reply;
+//													bestProposer = msgProposta.getSender();
+//													
+													resposta.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+
+//													accept = resposta;
+//													accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+												}else{
+													resposta.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+													
 												}
 											}//Fim do if msg.getPErformative() == ACLMessage.PROPOSE
 										}
-										// Accept the proposal of the best proposer
-										if (accept != null) {
-											exibirAviso(myAgent,"Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
-											accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-										}	
 										
-						
+										
+										// Accept the proposal of the best proposer
+//										if (accept != null) {
+//											exibirAviso(myAgent,"Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
+//											accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//										}	
+																
 									}// Fim do handle all responses
+									
+									protected void handleInform(ACLMessage inform) {
+										System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+									}
 								}); //Fim do contract net initiator
 							  
-								/**
-								 * Se tiver dispositivos armazenadores, manda-se um contracte net para todos ao mesmo tempo 
-								 * solicitando um deltaP. Devo pegar um pouco de cada ou pego o de uma vez só? Como sei que só terá 
-								 * um banco de baterias vou fazer pegando só de um dispositivo de armazenamento logo.
-								 */
-								/*if(){   //Se tem dispositivos armazenadores de energia, então
-								*//*********************************************************************************
-								 * FIPA Contract Net Initiator para negociação deltaP com sistemas de armazenamento de energia
-								 *********************************************************************************//*
-									ACLMessage negociar = new ACLMessage(ACLMessage.CFP);
-									List lista1 = agenteAlimentadorBD.getChild("outrosALs").getChildren(); 
-									Iterator i = lista1.iterator();
-			
-			
-									while(i.hasNext()) {
-			
-										Element elemento = (Element) i.next();
-			
-										//String nome = String.valueOf(elemento.getText());
-										String nome = String.valueOf(elemento.getText());
-										System.out.println("-<<"+agenteAlimentador+">>: o outro AL � "+nome);
-										//negociar.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
-										negociar.addReceiver(new AID( nome, AID.ISLOCALNAME));
-			
-									}
-			
-									// String carga = agenteAlimentadorBD.getChild("cargaPerdida").getAttributeValue("valor");
-									negociar.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-									negociar.setContent(carga); //Carga perdida
-			
-									addBehaviour(new ContractNetInitiator(myAgent, negociar) {
-			
-										protected void handlePropose(ACLMessage propose, Vector v) {
-											System.out.println("-<<"+agenteAlimentador+">>: o agente "+propose.getSender().getLocalName()+" disse "+propose.getContent());
-										}
-			
-										protected void handleRefuse(ACLMessage refuse) {
-											System.out.println("-<<"+agenteAlimentador+">>: o agente "+refuse.getSender().getLocalName()+" recusou");
-										}
-			
-										protected void handleFailure(ACLMessage failure) {
-											if (failure.getSender().equals(myAgent.getAMS())) {
-			
-												System.out.println("N�o existe outros agentes ALs");
-											}
-											else {
-												System.out.println("-<<"+agenteAlimentador+">>: o agente "+failure.getSender().getLocalName()+" falhou");
-											}
-											// Immediate failure --> we will not receive a response from this agent
-										}
-			
-										protected void handleAllResponses(Vector responses, Vector acceptances) {
-			
-										}// fim do handleAllResponses do comportamento Contract net
-									}// fim do if para ver se
-									*/
+								
 							    deltaP = 0;
 								PotenciaGeracaoTotal = 0;
 								PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
@@ -449,13 +459,12 @@ public class agentePC extends Agent { /**
 								}else{
 									exibirAviso(myAgent, "deltaP é maior que zero (deltaP>0).");
 								}
-				    	}
-				    });
+				    		}
+				    	}); //Fim do WakerBehaviour
 					
-				    
-				   
-					
-					}else if(filtroInformMonitoramento.getContent().equals("1")){
+					    
+			  		
+					}else if(msg.getContent().equals("1")){
 						exibirAviso(myAgent, "O PCC está fechado!");
 						
 					}else{
