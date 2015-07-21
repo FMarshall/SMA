@@ -267,7 +267,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		} );//Fim do request responder 
 		
 //			protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
-//				if (performAction()) {
+//				if (performAction()) {musas do metal
 //					System.out.println("Agent "+getLocalName()+": Action successfully performed");
 //					ACLMessage inform = request.createReply();
 //					inform.setPerformative(ACLMessage.INFORM);
@@ -286,7 +286,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 	 *  
 	 */
 	public void exibirMensagem(ACLMessage msg) {
-		System.out.println("\n\n===============<<MENSAGEM>>=====2=============");    	
+		System.out.println("\n\n===============<<MENSAGEM>>==================");    	
 		System.out.println("De: " + msg.getSender());
 		System.out.println("Para: " + this.getName());
 		System.out.println("Performativa: "+msg.getPerformative());

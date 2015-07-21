@@ -120,7 +120,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 					
 					String valorCarga = conteudo.split("/")[0]; // Valor da carga demandada
 					String estadoChave = conteudo.split("/")[1]; // Estado da chave
-					String refCarga = conteudo.split("/")[2]; /*A mensagem é no formato:  "referencia da carga/potencia demandada". Foi aplicado o método split para quebrar o "conteudo" em 
+					String refCarga = conteudo.split("/") [2]; /*A mensagem é no formato:  "referencia da carga/potencia demandada". Foi aplicado o método split para quebrar o "conteudo" em 
 					array sendo a separação definida pelo caracter "/". Da separação eu peguei a posição 0 da array que corresponde a referência da carga monitorada, visto que pode ter várias cargas.*/
 //					System.out.println("A referencia da carga é: "+refCarga); //Só pra testar se tava dando certo
 					

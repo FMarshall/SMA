@@ -105,7 +105,7 @@ public class agentePC extends Agent { /**
 			private static final long serialVersionUID = 1L;
 
 			public void onTick(){
-
+				deltaP = 0;
 				ACLMessage msg = receive(filtroInformMonitoramento);
 				//String conteudo = mensagem.getContent();
 
@@ -363,6 +363,9 @@ public class agentePC extends Agent { /**
 							    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
 							    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 							    	}
+							    	double PotenciaGeracaoTotal, valorPotGerRecebido = 0; //Inicialização da potência gerada por gerações intermitentes (
+							    	double PotenciaDemandaTotal, valorPotDemRecebido = 0; //Inicialização da potência demandada pelas cargas
+//							    	double deltaP = 0;    
 							    }		
 							    negociarDeltaP.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
 							    deltaP = Math.abs(deltaP); //módulo de deltaP
@@ -389,6 +392,109 @@ public class agentePC extends Agent { /**
 //										aviso.setContent("0");
 //										
 //										myAgent.send(aviso);
+										
+										/*********************************************************************************
+										 * FIPA Contract Net Initiator para negociação com dispositivos de geração controlada
+										*********************************************************************************/
+										final ACLMessage negociarDeltaP = new ACLMessage(ACLMessage.CFP);
+										List lista3 = agenteApcBD.getChild("agentesGeracaoControladas").getChildren(); 
+										Iterator i3 = lista3.iterator();
+										
+									    while(i3.hasNext()) 				{
+									    	Element elemento = (Element) i3.next();
+									    	String nome = String.valueOf(elemento.getName());
+											
+									    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//														System.out.println("Entrou no if!!!!!");  //Só pra testar
+									    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
+									    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+									    	}
+									    }		
+									    negociarDeltaP.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+									    exibirAviso(myAgent, "o valor de deltaP é: "+deltaP);
+									    deltaP = Math.abs(deltaP); //módulo de deltaP
+									    negociarDeltaP.setContent(String.valueOf(deltaP)); 
+									    
+									    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
+											
+											protected void handlePropose(ACLMessage propose, Vector v) {
+												exibirMensagem(propose);
+												
+//												ACLMessage reply = propose.createReply();
+//												reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//												v.addElement(reply);
+											}
+											
+											protected void handleRefuse(ACLMessage refuse) {
+												exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
+
+////											System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
+//												
+//												ACLMessage aviso = negociarDeltaP.createReply();
+//												aviso.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+//												aviso.setPerformative(ACLMessage.REFUSE);
+//												aviso.setContent("0");
+//												
+//												myAgent.send(aviso);
+											}
+											
+											protected void handleFailure(ACLMessage failure) {
+												if (failure.getSender().equals(myAgent.getAMS())) {
+													// Notificação de erro feita pela plataforma
+													exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
+												}
+												else {
+													exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+												}										
+											} //Fim do handleFailure
+											
+											protected void handleAllResponses(Vector responses, Vector acceptances) {
+//												ACLMessage reply = responses.createReply();
+//												reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+//												reply.setContent("");
+												
+												// Evaluate proposals.
+												double bestProposal = -1;
+//												AID bestProposer = null;
+												ACLMessage accept = null;
+												
+												Enumeration e = responses.elements();  //a variável "e" será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
+												while (e.hasMoreElements()) { //um while só pra percorrer todas as posições do vetor "e"
+													ACLMessage msgProposta = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
+													
+													if (msgProposta.getPerformative() == ACLMessage.PROPOSE) { //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
+														ACLMessage resposta = msgProposta.createReply(); //será criada então uma resposta para essa mensagem
+														acceptances.addElement(resposta);
+														
+														double proposal = Double.parseDouble(msgProposta.getContent()); //Aqui ele pega a propostas para avaliá-la
+														if (proposal > bestProposal) {
+															bestProposal = proposal;
+//															bestProposer = msgProposta.getSender();
+//															
+															resposta.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+
+//															accept = resposta;
+//															accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+														}else{
+															resposta.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+															
+														}
+													}//Fim do if msg.getPErformative() == ACLMessage.PROPOSE
+												}
+												
+												
+												// Accept the proposal of the best proposer
+//												if (accept != null) {
+//													exibirAviso(myAgent,"Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
+//													accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//												}	
+																		
+											}// Fim do handle all responses
+											
+											protected void handleInform(ACLMessage inform) {
+												System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+											}
+										}); //Fim do contract net initiator
 									}
 									
 									protected void handleFailure(ACLMessage failure) {
@@ -431,6 +537,8 @@ public class agentePC extends Agent { /**
 												}else{
 													resposta.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
 													
+													
+													
 												}
 											}//Fim do if msg.getPErformative() == ACLMessage.PROPOSE
 										}
@@ -450,7 +558,7 @@ public class agentePC extends Agent { /**
 								}); //Fim do contract net initiator
 							  
 								
-							    deltaP = 0;
+//							    deltaP = 0;
 								PotenciaGeracaoTotal = 0;
 								PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
 								
