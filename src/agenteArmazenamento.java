@@ -75,11 +75,11 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		//Filtro para receber somente mensagens do protocolo tipo "inform"
 		final MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		
-		final MessageTemplate filtroIlha = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
-		  		MessageTemplate.MatchContent("ilhou")); 
-		
-//		final MessageTemplate filtroInformMonitoramento = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchSender(getAID().getLocalName()); 
-			
+//		final MessageTemplate filtroIlha = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+//		  		MessageTemplate.MatchContent("ilhou")); 
+		final MessageTemplate filtroIlha = MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+		  		
+
 //		tcpAA1@192.168.1.6:1099/JADE
 //		AA1@192.168.1.6:1099/JADE
 		MessageTemplate filtroContractNet = MessageTemplate.and(
@@ -238,9 +238,6 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 
 			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 //				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
-				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
-				ACLMessage resposta = request.createReply();
-				
 //				if (checkAction()) {
 //					// We agree to perform the action. Note that in the FIPA-Request
 //					// protocol the AGREE message is optional. Return null if you
@@ -255,13 +252,27 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 //					System.out.println("Agent "+getLocalName()+": Refuse");
 //					throw new RefuseException("check-failed");
 //				}
+				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
-				//Antes eu dou uma atualizada no XML
-				agenteAABD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
-				agenteAABD.getChild("comando").getChild("status").setText("0"); //seta no XML o modo de tensão pois no matlab tem um NOT que enviará 1 para a fonte de tensão
+				ACLMessage resposta = request.createReply();
 				
-				resposta.setContent("Ok");
-				resposta.setPerformative(ACLMessage.AGREE);
+				if(request.getContent().equals("ilhou")){
+					//Antes eu dou uma atualizada no XML
+					agenteAABD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
+					agenteAABD.getChild("comando").getChild("status").setText("0"); //seta no XML o modo de tensão pois no matlab tem um NOT que enviará 1 para a fonte de tensão
+					
+					resposta.setContent("Ok");
+					resposta.setPerformative(ACLMessage.AGREE);
+				}else if (request.getContent().equals("conectado")) {
+					//Antes eu dou uma atualizada no XML
+					agenteAABD.getChild("comando").getChild("estadoChave").setText("0"); //seta o XML o disjuntor fechando
+//					agenteAABD.getChild("comando").getChild("status").setText("0"); //seta no XML o modo de tensão pois no matlab tem um NOT que enviará 1 para a fonte de tensão
+					
+					resposta.setContent("Ok");
+					resposta.setPerformative(ACLMessage.AGREE);
+					
+				};
+				
 				return resposta;
 			}
 		} );//Fim do request responder 

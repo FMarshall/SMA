@@ -5,7 +5,7 @@
  * Descrição
  * Este é o comportamento do Agente do ponto de conexão (APC) 
  * 
- *               ▬▬▬▬▬▬▬▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬▬▬▬▬▬▬▬▬▬
+ *               ▬▬▬▬▬▬▬▬▬▬▬ஜ۩۞۩ஜ▬▬▬▬▬▬36666666666666666666666+▬▬▬▬▬▬▬
  * << ▓▓▓▒▒▒░░░  Lista de Abreviaturas ░░░▒▒▒▓▓▓ >>
  *               
  * nomeAgente: variável que receberá o nome do agente em questão
@@ -140,10 +140,10 @@ public class agentePC extends Agent { /**
 //					}
 					
 					
-					/**
+					/**********************************************************************************
 				     * Protocolo FIPA Request para solicitar que o dispositivo de armazenamento atue fechando sua chave e servindo de fonte de tensão
 				     * 
-				     */
+				     *********************************************************************************/
 			  		ACLMessage msg1 = new ACLMessage(ACLMessage.REQUEST);
 			  		msg1.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 				  		
@@ -324,18 +324,10 @@ public class agentePC extends Agent { /**
 						   
 							PotenciaGeracaoTotal = 0;
 							PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
-							
-						    						    
+											    
 						    //Obs.: Por enquanto vou colocar valores aleatórios para cacular o balanço de potência na microrrede
 						    // Mas ai tenho que já ter uma base da potência da microrrede, das cargas...
-							
-							/**
-							 * Aqui supõe-se que eu já enviei um subscribe para o AG intermitente e cargas
-							 * e tenho o valor do balanço de potência na microrrede (deltaP)
-							 */
-//							double deltaP = -1000; //Balanço de potência na microrrede. 
-//							System.out.println("O valor do balanço é "+deltaP); //Só pra testar
-
+			
 							/**
 							 * Um valor positivo de deltaP diz que tá sobrando energia. Um valor negativo, diz que tá com déficit, ou seja, 
 							 * não tem geração suficiente.
@@ -574,6 +566,323 @@ public class agentePC extends Agent { /**
 			  		
 					}else if(msg.getContent().equals("1")){
 						exibirAviso(myAgent, "O PCC está fechado!");
+						
+						/**********************************************************************************
+					     * Protocolo FIPA Request para solicitar que o dispositivo de armazenamento atue comandando a abertura da sua chave
+					     * ###PCC FECHADO
+					     *********************************************************************************/
+				  		ACLMessage msg1 = new ACLMessage(ACLMessage.REQUEST);
+				  		msg1.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+					  		
+				  		//Cria-se uma lista para percorrer a tag agentesArmazenamento e ver seus elementos
+				  		List lista3 = agenteApcBD.getChild("agentesArmazenamento").getChildren(); 
+						Iterator i3 = lista3.iterator();
+						
+					    while(i3.hasNext()) { 
+					    	Element elemento = (Element) i3.next();
+					    	String nome = String.valueOf(elemento.getName());
+							
+					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes de armazenamento no XML, então add ele como remetente
+//										System.out.println("Entrou no if!!!!!");  //Só pra testar
+					    		exibirAviso(myAgent, "Solicitando a "+nome+"que abra sua chave.");
+					    		msg1.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+					    	}
+					    }		
+					  
+					    msg1.setContent("conectado");
+				  		
+				  		addBehaviour(new AchieveREInitiator(myAgent, msg1) {
+							protected void handleInform(ACLMessage inform) {
+								System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+							}
+							protected void handleRefuse(ACLMessage refuse) {
+//								System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
+//								nResponders--;
+							}
+							protected void handleFailure(ACLMessage failure) {
+								if (failure.getSender().equals(myAgent.getAMS())) {
+									// FAILURE notification from the JADE runtime: the receiver
+									// does not exist
+									System.out.println("Responder does not exist");
+								}
+								else {
+									System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+								}
+							}
+							protected void handleAllResultNotifications(Vector notifications) {
+//								if (notifications.size() < nResponders) {
+//									// Some responder didn't reply within the specified timeout
+//									System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
+//								}
+							}
+						}); //Fim do addBehaviour do request initiator
+						
+						
+						/********************************************************************************
+						 * FIPA Subscribe Initiator para saber o valor de Potência dos dispositivos de geração intermitente
+						 * ###PCC FECHADO
+						 ********************************************************************************/	
+						ACLMessage msgColetarPot = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
+						msgColetarPot.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+						msgColetarPot.setContent("Potencia");
+						
+						/**
+						 * Aqui vamos acessar o XML do APC para pesquisar o nome dos agentes de geração intermitente
+						 * e cargas para calcular o balanço de potência na microrrede
+						 * */
+						List lista = agenteApcBD.getChild("agentesGeracaoNaoControladas").getChildren(); 
+//								System.out.println("O nome dos AGs intermitentes são: "+lista);
+						Iterator i = lista.iterator();
+						
+					    while(i.hasNext()) {
+					    	Element elemento = (Element) i.next();
+					    	String nome = String.valueOf(elemento.getName());
+//							    	System.out.println("O nome é: "+nome);  //Só pra testar 
+					    	
+					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//										System.out.println("Entrou no if!!!!!");  //Só pra testar
+					    		exibirAviso(myAgent, "Solicitando valor de potencia gerada a " +nome);
+					    		msgColetarPot.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+					    	}
+					    }
+					    
+					    addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
+					    	
+							
+//							double PotenciaGeracaoTotal, valorPotGerRecebido = 0; //Inicialização da potência gerada por gerações intermitentes (
+//							double PotenciaDemandaTotal, valorPotDemRecebido = 0; //Inicialização da potência demandada pelas cargas
+//						    double deltaP = 0;  //Inicialização do balanço de potência
+						    
+							/* No handleAgree eu vou coletando os valores de todas as gerações e vou armazenando na variável PotenciaGeracaoI
+							 * (non-Javadoc)
+							 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
+							 */
+							protected void handleAgree(ACLMessage agree){
+								exibirMensagem(agree);
+								double valorRecebido = Double.parseDouble(agree.getContent());
+								valorPotGerRecebido = Double.parseDouble(agree.getContent());
+								exibirAviso(myAgent, "Recebi um valor de "+valorPotGerRecebido+" de "+agree.getSender());
+								PotenciaGeracaoTotal = PotenciaGeracaoTotal + valorPotGerRecebido; 
+								valorPotGerRecebido = 0;
+								
+//								exibirAviso(myAgent, "O valor da potencia gerada é: "+PotenciaGeracaoI);
+					    	}//Fim do handleAgree do Subscribe
+					
+							protected void handleRefuse(ACLMessage refuse) { //Se recusar
+								
+							}// Fim do handleRefuse do Subscribe
+							protected void handleFailure(ACLMessage failure) { //Se erro
+								
+							}// Fim do handleFailure do Subscribe
+					    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
+					    
+					    
+					    /********************************************************************************
+						 * FIPA Subscribe Initiator para saber o valor de Potência Demandada pelas cargas
+						 * ###PCC FECHADO
+						 ********************************************************************************/	
+						ACLMessage msgColetarPotCargas = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
+						msgColetarPotCargas.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+						msgColetarPotCargas.setContent("Potencia");
+						
+						/**
+						 * Aqui vamos acessar o XML do APC para pesquisar o nome dos agentes de geração intermitente
+						 * e cargas para calcular o balanço de potência na microrrede
+						 * */
+						List lista2 = agenteApcBD.getChild("agentesCarga").getChildren(); 
+//						System.out.println("O nome dos ADs são: "+lista2); //Só pra ver se deu certo
+						Iterator i2 = lista2.iterator();
+						
+					    while(i2.hasNext()) {
+					    	Element elemento = (Element) i2.next();
+					    	String nome = String.valueOf(elemento.getName());
+//							System.out.println("O nome é: "+nome);  //Só pra testar 
+//					    	exibirAviso(myAgent, "Solicitando valor de potencia demandada a: "+nome); //Só pra ver se deu certo
+							
+					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//										System.out.println("Entrou no if!!!!!");  //Só pra testar
+					    		exibirAviso(myAgent, "Solicitando valor de carga a " +nome);
+					    		msgColetarPotCargas.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+					    	}
+					    }
+					    
+					    addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPotCargas){
+					   
+							private static final long serialVersionUID = 1L; //Posto automaticamente
+//							double PotenciaGeracaoTotal, valorPotGerRecebido = 0; //Inicialização da potência gerada por gerações intermitentes (
+//							double PotenciaDemandaTotal, valorPotDemRecebido = 0; //Inicialização da potência demandada pelas cargas
+						    
+							/* No handleAgree eu vou coletando os valores de todas as gerações e vou armazenando na variável PotenciaGeracaoI
+							 * (non-Javadoc)
+							 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
+							 */
+							protected void handleAgree(ACLMessage agree){
+								exibirMensagem(agree);
+//								double valorRecebido = Double.parseDouble(agree.getContent());
+								valorPotDemRecebido = Double.parseDouble(agree.getContent());
+								exibirAviso(myAgent, "Recebi um valor de "+valorPotDemRecebido+" de "+agree.getSender());
+								PotenciaDemandaTotal = PotenciaDemandaTotal + valorPotDemRecebido; 
+								valorPotDemRecebido = 0;
+//								exibirAviso(myAgent, "O valor da potencia gerada é: "+PotenciaGeracaoI);
+								
+								
+					    	}//Fim do handleAgree do Subscribe
+					
+							protected void handleRefuse(ACLMessage refuse) { //Se recusar
+								
+							}// Fim do handleRefuse do Subscribe
+							protected void handleFailure(ACLMessage failure) { //Se erro
+								
+							}// Fim do handleFailure do Subscribe
+					    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPotCarga){
+						
+					    addBehaviour(new WakerBehaviour(myAgent, 1000) {
+					    	protected void handleElapsedTimeout() {
+					    		exibirAviso(myAgent, "Agent "+myAgent.getLocalName()+": It's wakeup-time. Bye...");
+							    exibirAviso(myAgent, "A potência gerada total é: "+PotenciaGeracaoTotal);
+							    exibirAviso(myAgent, "A potência demandada total é: "+PotenciaDemandaTotal);
+							    deltaP = PotenciaGeracaoTotal - PotenciaDemandaTotal;
+							    exibirAviso(myAgent, "O balanço de potência atual é: "+deltaP);
+							   
+								PotenciaGeracaoTotal = 0;
+								PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
+								
+								if(deltaP>0){
+									exibirAviso(myAgent, "Modo conectado com deltaP > 0. ");
+									
+								}else{ //deltaP<0
+									double tarifa = 2.0;  //supondo que li esse valor do xml
+									
+									if (tarifa<3.0) { //se entrar nesse if, é porque a tarifa tá barata
+										//Inform para bateria recarregar se quiser
+										//importar da rede; Tarifa muito barata
+									}else{
+										/**se entrar nesse if, será necessário consultar o XMl para averiguar se há dispositivos
+										 * armazenadores de energia
+										 */
+										exibirAviso(myAgent, "Entrei dentro do if do deltaP");
+										/*********************************************************************************
+										 * FIPA Contract Net Initiator para negociação com dispositivos de armazenamento
+										 * ###PCC FECHADO
+										*********************************************************************************/
+										final ACLMessage negociarDeltaP = new ACLMessage(ACLMessage.CFP);
+										List lista3 = agenteApcBD.getChild("agentesArmazenamento").getChildren(); 
+										Iterator i3 = lista3.iterator();
+										
+									    while(i3.hasNext()) 				{
+									    	Element elemento = (Element) i3.next();
+									    	String nome = String.valueOf(elemento.getName());
+											
+									    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//														System.out.println("Entrou no if!!!!!");  //Só pra testar
+									    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
+									    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+									    	}
+									    	double PotenciaGeracaoTotal, valorPotGerRecebido = 0; //Inicialização da potência gerada por gerações intermitentes (
+									    	double PotenciaDemandaTotal, valorPotDemRecebido = 0; //Inicialização da potência demandada pelas cargas
+//									    	double deltaP = 0;    
+									    }		
+									    negociarDeltaP.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+									    deltaP = Math.abs(deltaP); //módulo de deltaP
+									    negociarDeltaP.setContent(String.valueOf(deltaP)); 
+									    
+									    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
+											
+											protected void handlePropose(ACLMessage propose, Vector v) {
+												exibirMensagem(propose);
+												
+//												ACLMessage reply = propose.createReply();
+//												reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//												v.addElement(reply);
+											}
+											
+											protected void handleRefuse(ACLMessage refuse) {  
+												exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
+
+////											System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
+//												
+//												ACLMessage aviso = negociarDeltaP.createReply();
+//												aviso.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+//												aviso.setPerformative(ACLMessage.REFUSE);
+//												aviso.setContent("0");
+//												
+//												myAgent.send(aviso);
+												
+												
+											}// fim do handle Refuse do contract net para sistemas de armazenamento estando a microrrede conectada a rede
+											
+											protected void handleFailure(ACLMessage failure) {
+												if (failure.getSender().equals(myAgent.getAMS())) {
+													// Notificação de erro feita pela plataforma
+													exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
+												}
+												else {
+													exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+												}										
+											} //Fim do handleFailure
+											
+											protected void handleAllResponses(Vector responses, Vector acceptances) {
+//												ACLMessage reply = responses.createReply();
+//												reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+//												reply.setContent("");
+												
+												// Evaluate proposals.
+												double bestProposal = -1;
+//												AID bestProposer = null;
+												ACLMessage accept = null;
+												
+												Enumeration e = responses.elements();  //a variável "e" será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
+												while (e.hasMoreElements()) { //um while só pra percorrer todas as posições do vetor "e"
+													ACLMessage msgProposta = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
+													
+													if (msgProposta.getPerformative() == ACLMessage.PROPOSE) { //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
+														ACLMessage resposta = msgProposta.createReply(); //será criada então uma resposta para essa mensagem
+														acceptances.addElement(resposta);
+														
+														double proposal = Double.parseDouble(msgProposta.getContent()); //Aqui ele pega a propostas para avaliá-la
+														if (proposal > bestProposal) {
+															bestProposal = proposal;
+//															bestProposer = msgProposta.getSender();
+//															
+															resposta.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+
+//															accept = resposta;
+//															accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+														}else{
+															resposta.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+															
+															
+															
+														}
+													}//Fim do if msg.getPErformative() == ACLMessage.PROPOSE
+												}
+												
+												
+												// Accept the proposal of the best proposer
+//												if (accept != null) {
+//													exibirAviso(myAgent,"Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
+//													accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//												}	
+																		
+											}// Fim do handle all responses
+											
+											protected void handleInform(ACLMessage inform) {
+												System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+											}
+										}); //Fim do contract net initiator
+									  
+										
+//									    deltaP = 0;
+										PotenciaGeracaoTotal = 0;
+										PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
+										
+									}
+									
+								}
+								
+								
+					    	}// fim do protected void handleElapsedTimeout() {
+					    });	//fim do addBehaviour(new WakerBehaviour(myAgent, 1000) {
 						
 					}else{
 						exibirAviso(myAgent, "O PCC não está acusando nem 0 nem 1!! Problema");
