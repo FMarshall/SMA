@@ -103,7 +103,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 		 * Parte 2 (comando) - Leitura do XML para comando de chaves e modo de atuação (fonte de corrente ou tensão) 
 		 */
 		addBehaviour(new TickerBehaviour(this,100){
-			/**
+			/**msgColetarPot.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;

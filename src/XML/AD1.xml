@@ -3,7 +3,11 @@
 <agenteDemanda nome = "AD1">
   <estadoChave>0</estadoChave>  
   <cargas>
-    <carga1 demanda="0"  tensao="0" corrente="0" frequencia="0" prioridade="1" estadoChave="0"/>
+    <carga1 demanda="0"  tensao="0" corrente="0" frequencia="0" prioridade="1" estadoChave="0"  comando="1"/>
+    <carga2 demanda="0"  tensao="0" corrente="0" frequencia="0" prioridade="1" estadoChave="0" comando="1"/>
+    <carga3 demanda="0"  tensao="0" corrente="0" frequencia="0" prioridade="0" estadoChave="0" comando="1"/>
+    <carga4 demanda="0"  tensao="0" corrente="0" frequencia="0" prioridade="0" estadoChave="0" comando="1"/>
+    <carga5 demanda="0"  tensao="0" corrente="0" frequencia="0" prioridade="0" estadoChave="0" comando="1"/>
   </cargas>
   
 </agenteDemanda>

@@ -129,7 +129,7 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 					 * O camando será enviado como resposta ao inform da medição. São aproveitadas 2 das variáveis anteriores 
 					 */
 					estadoChave = agenteGCBD.getChild("comando").getChild("estadoChave").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
-					String potencia = agenteGCBD.getChild("comando").getChildText("pot"); //consulta no XML a potência de referência que terá que ser gerada
+					String potencia = agenteGCBD.getChild("comando").getChildText("potNominal"); //consulta no XML a potência de referência que terá que ser gerada
 					
 					ACLMessage resposta = msg.createReply();
 					resposta.setContent(estadoChave+"/"+potencia); //A mensagem será no formato "estadoChave/potencia"
@@ -152,14 +152,17 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 				
 				// We provide a proposal
 //					System.out.println("Agent "+getLocalName()+": Proposing "+proposal);
-				exibirAviso(myAgent, "Aceito a solicitação de deltaP igual a: "+cfp.getContent());
+//				double deltaP = Double.parseDouble(cfp.getContent());
+//				double potenciaNominal = Double.parseDouble(agenteGCBD.getChild("potNominal").getText());
+				
+				exibirAviso(myAgent, "Estou propondo: "+agenteGCBD.getChild("comando").getChild("potNominal").getText());
+				
 				ACLMessage propose = cfp.createReply();
 				propose.setPerformative(ACLMessage.PROPOSE);
-//					propose.setContent(String.valueOf(valorSOC));
-				propose.setContent(cfp.getContent());
+				propose.setContent(agenteGCBD.getChild("comando").getChild("potNominal").getText());
 				return propose;
 				
-//				else {  //Assume-se que sempre tera combustível para fornecer o que for solicitado de potência
+//				else {  //Assume-se que sempre tera combustível para fornecer a potencial nominal da fonte controlada
 //					// We refuse to provide a proposal
 ////					System.out.println("Agent "+getLocalName()+": Refuse");
 //					exibirAviso(myAgent, "Recusei o pedido de deltaP");
@@ -177,8 +180,8 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 					//Antes eu dou uma atualizada no XML
 					agenteGCBD.getChild("comando").getChild("estadoChave").setText("1"); /*seta o XML o disjuntor fechando para quando o agente receber o informe de monitoramento, ele ler
 					 																		o esse valor de xml e respodner comandando a chave*/
-					agenteGCBD.getChild("comando").getChild("pot").setText(cfp.getContent()); /*seta no XML o valor da potência que terá que ser gerada para quando o agente receber o informe de monitoramento, ele ler
-					 																		o esse valor de xml e respodner comandando */
+//					agenteGCBD.getChild("comando").getChild("pot").setText(cfp.getContent()); /*seta no XML o valor da potência que terá que ser gerada para quando o agente receber o informe de monitoramento, ele ler
+					 																		//o esse valor de xml e respodner comandando */
 					
 					return inform;
 //				}

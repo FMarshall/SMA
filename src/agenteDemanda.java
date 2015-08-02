@@ -24,13 +24,18 @@ import jade.lang.acl.MessageTemplate; // Para uso dos filtros
 
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.FIPANames;
-
+import jade.domain.FIPAAgentManagement.NotUnderstoodException;
+import jade.domain.FIPAAgentManagement.RefuseException;
+import jade.proto.AchieveREResponder;
 import jade.proto.SubscriptionResponder;
 
 //As bibliotecas abaixo foram exigidas no decorrer do SubscriptionResponder
 //import jade.domain.FIPAAgentManagement.FailureException;
 //import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 //import jade.domain.FIPAAgentManagement.RefuseException;
+
+
+
 
 
 
@@ -42,6 +47,9 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
+
+
+
 
 
 
@@ -73,18 +81,9 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 		
 		MessageTemplate filtroSubscribe = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE),MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE)); 
 		
+		final MessageTemplate filtroCorte = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 		
-//		System.out.println(".:: Agente PCC APCC1 iniciado com sucesso! ::.\n");
-//		System.out.println("Todas as minhas informações: \n" +getAID());
-//		System.out.println(">> Meu nome local é " + getLocalName()); // Informações completas
-//		System.out.println("\n>> Meu nome global é " +getAID().getName());
-//		System.out.println("Meu endereço é " +getAID().getAllAddresses());
-		
-//		System.out.println("\nMeus endereços são: ");
-//		Iterator it = getAID().getAllAddresses();
-//		while(it.hasNext()){
-//			System.out.println("- "+it.next());
-//		}
+
 		/**
 		 * Este comportamente temporial é somente para aquisição de dados do matlab, no caso, de um sistema de geração
 		 * intermitente. 
@@ -120,12 +119,67 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 					
 					String valorCarga = conteudo.split("/")[0]; // Valor da carga demandada
 					String estadoChave = conteudo.split("/")[1]; // Estado da chave
+					
 					String refCarga = conteudo.split("/") [2]; /*A mensagem é no formato:  "referencia da carga/potencia demandada". Foi aplicado o método split para quebrar o "conteudo" em 
 					array sendo a separação definida pelo caracter "/". Da separação eu peguei a posição 0 da array que corresponde a referência da carga monitorada, visto que pode ter várias cargas.*/
 //					System.out.println("A referencia da carga é: "+refCarga); //Só pra testar se tava dando certo
 					
 					agenteADBD.getChild("cargas").getChild(refCarga).setAttribute("demanda",valorCarga);	//seta o XML do agente atualizando o valor da demanda
 					
+					/*
+					 * Parte de consulta ao XML e comando
+					 * O camando será enviado como resposta ao inform da medição. São aproveitadas 2 das variáveis anteriores 
+					 */
+					ACLMessage resposta = msg.createReply();
+					String conteudoDaResposta = null;
+					
+					List lista = agenteADBD.getChild("cargas").getChildren(); 
+			  		
+					Iterator i = lista.iterator();
+						
+					    while(i.hasNext()) {
+					    	Element elemento = (Element) i.next();
+					    	String nome = String.valueOf(elemento.getName());
+	//						System.out.println("O nome é: "+nome);  //Só pra testar 
+	//				    	exibirAviso(myAgent, "Solicitando valor de potencia demandada a: "+nome); //Só pra ver se deu certo
+							
+					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//					    		exibirAviso(myAgent, "Solicitando corte de carga à " +nome);
+					    		
+					    		String comando = String.valueOf(elemento.getAttributeValue("comando"));
+					    		exibirAviso(myAgent,"O comando de "+nome+" é "+comando);
+					    		
+					    		if(comando.equals("0")){
+					    			if(conteudoDaResposta == null){
+//					    				conteudoDaResposta = new StringBuilder(String.valueOf(conteudoDaResposta)).append("0/").toString();
+					    				conteudoDaResposta = "0/";
+					    			}else{
+						    			conteudoDaResposta = conteudoDaResposta.concat("0/");
+						    			exibirAviso(myAgent,conteudoDaResposta);
+					    			}	
+					    		}else if(comando.equals("1")){
+					    			if(conteudoDaResposta == null){
+//					    				conteudoDaResposta = new StringBuilder(String.valueOf(conteudoDaResposta)).append("0/").toString();
+					    				conteudoDaResposta = "1/";
+					    			}else{
+						    			conteudoDaResposta = conteudoDaResposta.concat("1/");
+					    				exibirAviso(myAgent,conteudoDaResposta);
+					    			}	
+					    			exibirAviso(myAgent,conteudoDaResposta);
+					    		}
+					    	}
+					    }	
+					
+					
+//					estadoChave = agenteAABD.getChild("comando").getChild("estadoChave").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
+//					modoAtuacao = agenteAABD.getChild("comando").getChildText("status"); //consulta no XML o modo de atuação
+//					String Pbat = agenteAABD.getChild("comando").getChildText("Pbat"); // valor da potência gerada quando estiver no modo fonte de correte
+					
+					
+					resposta.setContent(conteudoDaResposta); //A mensagem será no formato "estadoChave/modoAtuacao/Pbat"
+					exibirAviso(myAgent, "O conteúdo final ficou: "+conteudoDaResposta);
+					send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
+			
 					/*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
 					/* Essa parte é opcional. Creio que não seja necessário responder ao matlab que deu certo.
 					 * ACLMessage resposta = msg.createReply();
@@ -188,6 +242,69 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 			
 		});	//Fim do SubscriptionResponder
 		
+		/**********************************************************************************
+		 * FIPA Request Responder para responder a solicitação do APC para cortar cargas
+		 ***********************************************************************************/
+		addBehaviour(new AchieveREResponder(this, filtroCorte) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+//				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				if (checkAction()) {
+//					// We agree to perform the action. Note that in the FIPA-Request
+//					// protocol the AGREE message is optional. Return null if you
+//					// don't want to send it.
+//					System.out.println("Agent "+getLocalName()+": Agree");
+//					ACLMessage agree = request.createReply();
+//					agree.setPerformative(ACLMessage.AGREE);
+//					return agree;
+//				}
+//				else {
+//					// We refuse to perform the action
+//					System.out.println("Agent "+getLocalName()+": Refuse");
+//					throw new RefuseException("check-failed");
+//				}
+//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+				
+				exibirMensagem(request);
+				ACLMessage resposta = request.createReply();
+				
+				if(request.getContent().equals("corteDeCarga")){
+					exibirAviso(myAgent, "Estou cortando as cargas não prioritárias");
+					
+					List lista = agenteADBD.getChild("cargas").getChildren(); 
+			  		
+					Iterator i = lista.iterator();
+						
+					    while(i.hasNext()) {
+					    	Element elemento = (Element) i.next();
+					    	String nome = String.valueOf(elemento.getName());
+	//						System.out.println("O nome é: "+nome);  //Só pra testar 
+	//				    	exibirAviso(myAgent, "Solicitando valor de potencia demandada a: "+nome); //Só pra ver se deu certo
+							
+					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//					    		exibirAviso(myAgent, "Solicitando corte de carga à " +nome);
+					    		
+					    		String prioridade = String.valueOf(elemento.getAttributeValue("prioridade"));
+					    		if(prioridade.equals("0")){
+//					    			elemento.getAttribute("prioridade").setValue("0");
+					    			elemento.setAttribute("comando","0");
+					    		}
+					    	}
+					    }	
+						//Antes eu dou uma atualizada no XML
+//						agenteADBD.getChild("medidasAtuais").getChild("estadoChave").setText("0"); //seta o XML o disjuntor fechando
+					
+					resposta.setContent("Ok");
+					resposta.setPerformative(ACLMessage.AGREE);
+				};
+				
+				return resposta;
+			}
+		} );//Fim do request responder 
 		
 		
 		

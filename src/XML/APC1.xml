@@ -4,19 +4,23 @@
 
 <agentePC  nome = "APC1">   <!-- Pode ser que seja necessario usar um nome local e um nome global. O nome global eh para os agentes dispositivos -->
 		
-   <tarifa valor = "0"/> 
-   
     <!-- Pontos de Medida -->
-   <tensaoPC valor="0"/>  
-   <correntePC valor="0"/>
-   <frequenciaPC valor="0"/> 
-   <potenciaPC valor="0"/>
+    <medidasAtuais>
+         <!-- Pontos digitais e de comando-->
+         <estadoChave>1</estadoChave><!-- Indica se a a uRede esta conectada ou nao a rede-->         
+         <falta> 0 </falta> <!-- Indicacao de faltapor um Agente chave. Preventivo em relacao a questao da regiao de sombreamento-->
+         <status>0</status>      
+    
+          <tarifa valor = "0"/> 
+       
+         <tensaoPC valor="0"/>  
+         <correntePC valor="0"/>
+         <frequenciaPC valor="0"/> 
+         <potenciaPC valor="0"/>
+    </medidasAtuais>   
    <!-- colocar sentido  do fluxo de "encnia-->
   
-     <!-- Pontos digitais e de comando-->
-   <cr>0</cr> <!-- Indica se a a uRede esta conectada ou nao a rede-->         
-   <falta> 0 </falta> <!-- Indicacao de faltapor um Agente chave. Preventivo em relacao a questao da regiao de sombreamento-->
-   <status>0</status>  
+     <status>0</status>  
      
     <agentesGeracaoNaoControladas> <!-- Ver se sera necessario um atributo indicando se ha agentes ou nao-->
       <AG1 tipo="FV"   estadoChave = "0" potencia= "0" />
@@ -34,5 +38,8 @@
      <AD1 estadoChave="fechada" tipo="trifasica" demanda="0" />
     </agentesCarga>
     
-	
+	  <!-- comando-->
+   <comando>
+    <estadoChave>1</estadoChave> <!-- Inicialmente tem que ser setado com valor 0-->
+   </comando>  
 </agentePC>
