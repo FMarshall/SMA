@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ..:: Banco de dados modelo de um AGENTE ALIMENTADOR (AL) ::..-->
+
+<agenteAL nome = "AL1">
+		<estado>disponivel</estado>
+		
+		<chaves> <!-- Chaves normais -->
+			<AL1_R1 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "7"/>   
+			<AL1_R2 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "6" />
+			<AL1_R3 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "5" />
+		</chaves>
+		
+      <microrredes>
+        <nenhum  trecho = "0"  potencia="0"  />    
+      </microrredes>
+    
+		<ultima index = "3" />
+		
+		<quantChavesFechar valor = "0"/>
+		
+		<chavesDeTrajeto>  
+		
+			<AL2>
+				<chaveDeEncontro indicativo = "sim" recusa = "nao">
+					<chave nome = "CH_A" ativa = "D0" atuacao = "f0" estado ="aberta" carregamento = "0" />
+				</chaveDeEncontro>
+				
+				<chaveNormal indicativo = "nao" nomeAL = "nenhum"> 
+					<chave nome = "nenhum" />						
+				</chaveNormal>
+			
+				<trechos indicativo = "nao"> <!-- está sendo implementado -->
+					<trecho nome = "nenhum" />
+				</trechos>
+				
+				<fecharChave>
+					<chave nome = "nenhum"/>
+				</fecharChave>
+			</AL2>
+			
+			<AL3> 
+				<chaveDeEncontro indicativo = "sim" recusa = "nao" > 
+					<chave nome = "CH_A" disponibilidade = "D0" atuacao = "f0" estado ="aberta" carregamento = "0" />
+					<chave nome = "CH_B" disponibilidade = "D0" atuacao = "f0" estado ="aberta" carregamento = "0" />
+				</chaveDeEncontro>
+				
+				<chaveNormal indicativo = "sim" nomeAL = "AL2">
+					<chave nome = "AL2_R3" />					
+				</chaveNormal>
+	
+				<trechos indicativo = "sim" >  <!-- Sendo implementado-->
+					<trecho nome = "1" />
+				</trechos>
+				
+				<fecharChave>
+					<chave nome = "AL2_R2"/>
+				</fecharChave>
+			</AL3> 
+			
+		</chavesDeTrajeto>
+		
+		<prioridade_ajuda>
+		 <!-- nao esta sendo usado ainda. Essa tag do i_AL2 sera tirada, pois e a parte do limite do condutor-->   
+			<AL2 prioridade = "1" i_AL2 = "6"/>
+			<Al3 prioridade = "2" i_AL3 = "8"/>
+		</prioridade_ajuda>
+		
+		<outrosALs>
+			<nome> AL2 </nome>
+			<nome> AL3 </nome>
+		</outrosALs>
+		
+		<suasChaves>
+			<nome> AL1_R1 </nome>
+			<nome> AL1_R2 </nome>
+			<nome> AL1_R3 </nome>
+		</suasChaves>
+		
+		<prioridade_pedido>
+		<!-- Ainda sera usado-->
+			<AL2 prioridade = "1" />
+			<Al3 prioridade = "2" />
+		</prioridade_pedido>
+		
+		<limFonte valor = "5"/> <!-- Capacidade do AL1-->
+		<limCondutor valor = "4" nome = "AL1_R3"/> <!-- entende-se que na hora de ajudar so teremos sentido + -->
+		<cargaDemandadaTotal valor = "0"/>
+		
+		<cargaPerdidaTotal valor = "0"/>
+		<cargaPerdida valor = "0"/>
+		
+		<suprimentoDeCarga status = "normal"> <!-- Aqui fica as cargas doadas ou recebidas de outros ALs. Pode ser: normal, doando, recebendo -->
+			<AL2>
+				<carga valor = "0" />
+			</AL2>
+			
+			<AL3>
+				<carga valor = "0" />
+			</AL3>
+		</suprimentoDeCarga>
+		
+		<trechos>
+			<trecho7 capacidade = "10"/>
+			<trecho6 capacidade = "10"/>
+			<trecho5 capacidade = "10"/>
+		</trechos>
+		
+</agenteAL>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Banco de dados de um agente de chave-->
+
+<agenteAC nome = "CH_B"> 
+	
+	<disponibilidade indicativo = "D0"/> <!-- este campo diz se ao AL se essa chave esta sendo usada por alguem ou nao-->
+										 <!--As opcoes podem ser: D0(nao usado), D1(sendo usado)-->
+	<agenteAL> <!-- nomes dos ALs que estao utilizando esta chave de apoio -->
+		<nome1>nenhum</nome1>
+		<nome1>nenhum</nome1>
+		<nome1>nenhum</nome1>
+	</agenteAL>  
+	
+	<estado> aberta </estado>   <!-- Estado atual da chave, se ta aberta ou fechada -->
+	<atuacao>f0</atuacao>   <!-- Pode ser f0(falta zero), f1(curto principal), f2(curto secundário),f3(curto terciário) ou ma (manobra)-->
+	<carga valor = "1" />   <!-- ultimo valor de carregamento, que pode ser a potencia perdida naquele trecho-->
+
+	<sentido sinal = "+" />
+		
+	<!-- Futuramente deve haver nivel de tensao-->
+	
+	<porta valor = "4009"/>
+</agenteAC>

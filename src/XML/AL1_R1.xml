@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Banco de dados de um agente de chave-->
+
+<agenteAC nome = "AL1_R1"> 
+	
+	<agenteAL>AL1</agenteAL>   <!-- Agente AL ao qual pertence --> 
+	<estado>fechada</estado>   <!-- Estado atual da chave, se ta aberta ou fechada -->
+	<atuacao>f0</atuacao>   <!-- Pode ser nao, falta1(curto principal), falta2(curto secundário),falta3(curto terciário) ou manobra-->
+	<carga valor = "1" />   <!-- ultimo valor de carregamento, que pode ser a potencia perdida naquele trecho-->
+	<!--<quantChaves> 0 </quantChaves> -->
+	<quantChaves valor = "0"/> 
+	
+	<sentido sinal = "+" >
+		<sentido1> <!-- Sentido + -->
+			<!-- <outrasChaves nome1 = "AL1_R2" nome2 = "AL1_R3" > --><!--Outros agentes de Chave do mesmo domínio-->
+			<trecho nome = "7"/>
+			
+			<outrasChaves>
+				<nome>AL1_R2</nome> 
+				<nome>AL1_R3</nome>
+			</outrasChaves>
+		</sentido1>   
+		
+		<sentido2>  <!-- Sentido -->
+			<trecho nome = "nenhum"/>
+			
+			<outrasChaves>
+				<nome>nenhum</nome> 	
+			</outrasChaves>
+		</sentido2> 
+	</sentido> 
+	
+	<porta valor = "4001"/>
+</agenteAC>
+
+
+
