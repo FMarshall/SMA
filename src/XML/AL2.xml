@@ -6,13 +6,23 @@
 		<estado>disponivel</estado>
 		
 		<chaves> <!-- Chaves normais -->
-			<AL2_R1 atuacao = "nao" estado = "fechada" carga = "1" sentido = "+" trecho = "4"/>  
+			<AL2_R1 atuacao = "nao" estado = "fechada" carga = "1" sentido = "+" trecho = "4" />  
 			<AL2_R2 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "3" />
-			<AL2_R3 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "2" />
+			<AL2_R3 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "2"/>
 		</chaves>
 		
     <microrredes>
-      <APC1  trecho = "3"  potencia="0"  />    
+      <AL2_R1>
+          <nenhum  potenciaDisponivel="0"   />
+      </AL2_R1>  
+         
+      <AL2_R2>
+          <APC1  potenciaDisponivel="0"   />
+      </AL2_R2>
+      
+      <AL2_R3>
+          <nenhum potenciaDisponivel="0"   />
+      </AL2_R3>  
     </microrredes>
 		
 		<ultima index = "3" /> 

@@ -21,6 +21,7 @@ import jade.util.leap.Serializable;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -29,6 +30,8 @@ import java.util.Iterator;
 import java.util.List;
 
 //import java.util.*;
+
+
 
 
 
@@ -49,6 +52,8 @@ import org.jdom2.input.SAXBuilder;
 
 
 
+
+
 import java.util.Date;
 import java.util.Vector;
 
@@ -58,10 +63,12 @@ public class agenteChave extends Agent{
 		
 		//Pega o nome do agente no Banco de Dados
 		final String agenteChave = getLocalName();
-//		final Element agenteChaveBD = carregaBD(agenteChave);
+		final Element agenteCBD = carregaBD(agenteChave);
 		
 		final MessageTemplate fitro_Inform = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchContent("curto"));
-		//MessageTemplate fitro_Inform = MessageTemplate.MatchContent("curto");
+		
+		final MessageTemplate filtroAbrir = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+  		MessageTemplate.MatchContent("abra")); 
 		
 	
 		addBehaviour(new TickerBehaviour(this,100) {
@@ -73,7 +80,8 @@ public class agenteChave extends Agent{
 					if(msg.getContent().equalsIgnoreCase("curto")) {
 						exibirAviso(myAgent, "detectei um curto");
 						
-						//seta no seu xml aqui
+						agenteCBD.getChild("estado").setText("0"); //seto a TAG "estado" do XML como aberta ("0")
+						agenteCBD.getChild("comando").setText("0"); //quando o agente  for responder ao matlab enviando um sinal de comando ele irá querer a chave continuando aberta
 						
 						/********************************************************************************
 						 * FIPA Subscribe Initiator para informar que houve falta
@@ -104,15 +112,70 @@ public class agenteChave extends Agent{
 					    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
 					    
 						
-					}
-				}
+					}// Fim do msg é curto
+					else { //Se não for curto, então para envio do valor de potência do trecho para atualização
+						/*
+						 * Parte de medição e aquisição de dados e armazenamento no XML
+						 */
+						String conteudo = msg.getContent();  //Pego o conteudo da mensagem
+						exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+conteudo);
+						
+						//O conteudo do agente chave é somente o valor de corrente demandada no seu trecho
+						agenteCBD.getChild("carga").setText(conteudo);	//seta o XML do agente atualizando o valor da corrente demandada
+						
+						/*
+						 * Parte de consulta ao XML e comando
+						 * O camando será enviado como resposta ao inform da medição. 
+						 */
+						String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
+												
+						ACLMessage resposta = msg.createReply();
+						resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
+						send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
+						
+					}// Fim do se é curto senão é para atualização do valor de potência nos trechos
+				}// Fim do if para saber se mensagem != null
 				
 				
 				
 			}//Final do m�todo action do addBehaviour
 	    });//Final do comportamento addBehaviour(cyclic Behaviour)
 		
-		
+		/*************************************************************************
+		 * FIPA Request Responder para responder a solicitação do AL para abrir
+		 **************************************************************************/
+		addBehaviour(new AchieveREResponder(this, filtroAbrir) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+//				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				if (checkAction()) {
+//					// We agree to perform the action. Note that in the FIPA-Request
+//					// protocol the AGREE message is optional. Return null if you
+//					// don't want to send it.
+//					System.out.println("Agent "+getLocalName()+": Agree");
+//					ACLMessage agree = request.createReply();
+//					agree.setPerformative(ACLMessage.AGREE);
+//					return agree;
+//				}
+//				else {
+//					// We refuse to perform the action
+//					System.out.println("Agent "+getLocalName()+": Refuse");
+//					throw new RefuseException("check-failed");
+//				}
+				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+				
+				ACLMessage resposta = request.createReply();
+				
+				//Antes seto no XML que o agente chave irá comandar a abertura da sua chave quando for responder ao inform de monitoramento do matlab
+				agenteCBD.getChild("comando").setText("0");
+				
+				return resposta;
+			}// Fim do protected ACLMessage prepareResponse
+		} );//Fim do request responder 
 
 }//Fim do setup
 	
@@ -144,6 +207,37 @@ public class agenteChave extends Agent{
     	
 //		System.out.println(System . currentTimeMillis ());
 	}
+	
+	/**
+	 *  Método para carregamento do XML
+	 * 
+	 */
+	public Element carregaBD(String nomeAgente) {
+
+		// Declaração de variáveis, uma de cada tipo
+		File endereco = null; // Desnecessário se usarmos o endereço do arq.
+								// dentro do doc dentro do try
+		SAXBuilder builder = null; // usado p/ processar a estrut. do doc. p/
+									// dentro da variável do tipo documento
+		Document doc = null;
+		Element BD = null;
+
+		endereco = new File("src/XML/" + nomeAgente + ".xml");
+
+		builder = new SAXBuilder();
+
+		try { // Criando o arquivo propriamente dito
+			doc = builder.build(endereco);
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}// fim do try
+
+		BD = doc.getRootElement();
+		return BD;
+
+	}// fim do método carregarBD
 	
 }
 

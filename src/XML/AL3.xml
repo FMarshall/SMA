@@ -10,7 +10,9 @@
 		</chaves>
 		
 		<microrredes>
-      <nenhum  trecho = "0"  potencia="0"  />    
+      <AL3_R1>
+          <nenhum  potenciaDisponivel="0"   />
+      </AL3_R1>  
     </microrredes>
 		
 		<ultima index = "1" /> <!-- índice da ultima chave do dominio desse AL-->

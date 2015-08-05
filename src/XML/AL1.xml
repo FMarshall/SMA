@@ -6,17 +6,25 @@
 		<estado>disponivel</estado>
 		
 		<chaves> <!-- Chaves normais -->
-			<AL1_R1 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "7"/>   
+			<AL1_R1 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "7"  />   
 			<AL1_R2 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "6" />
 			<AL1_R3 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "5" />
 		</chaves>
 		
-      <microrredes>
-        <nenhum  trecho = "0"  potencia="0"  />    
-      </microrredes>
+   <microrredes>
+      <AL1_R1>
+          <nenhum  potenciaDisponivel="0"   />
+      </AL1_R1>  
+         
+      <AL1_R2>
+          <nenhum  potenciaDisponivel="0"   />
+      </AL1_R2>
+      
+      <AL1_R3>
+          <nenhum potenciaDisponivel="0"   />
+      </AL1_R3>  
+    </microrredes>
     
-		<ultima index = "3" />
-		
 		<quantChavesFechar valor = "0"/>
 		
 		<chavesDeTrajeto>  
@@ -27,7 +35,7 @@
 				</chaveDeEncontro>
 				
 				<chaveNormal indicativo = "nao" nomeAL = "nenhum"> 
-					<chave nome = "nenhum" />						
+					<chave nome = "nenhum" />	
 				</chaveNormal>
 			
 				<trechos indicativo = "nao"> <!-- está sendo implementado -->

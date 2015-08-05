@@ -1,14 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!-- Banco de dados de um agente de chave-->
 
 <agenteAC nome = "AL1_R1"> 
 	
 	<agenteAL>AL1</agenteAL>   <!-- Agente AL ao qual pertence --> 
-	<estado>fechada</estado>   <!-- Estado atual da chave, se ta aberta ou fechada -->
+	<estado>0</estado>   <!-- Estado atual da chave, se ta aberta ou fechada -->
 	<atuacao>f0</atuacao>   <!-- Pode ser nao, falta1(curto principal), falta2(curto secundário),falta3(curto terciário) ou manobra-->
-	<carga valor = "1" />   <!-- ultimo valor de carregamento, que pode ser a potencia perdida naquele trecho-->
+	<carga>0</carga>   <!-- ultimo valor de carregamento, que pode ser a potencia perdida naquele trecho-->
 	<!--<quantChaves> 0 </quantChaves> -->
 	<quantChaves valor = "0"/> 
+	<comando>1</comando>
 	
 	<sentido sinal = "+" >
 		<sentido1> <!-- Sentido + -->
