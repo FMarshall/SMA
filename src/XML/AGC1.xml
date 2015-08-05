@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<agenteGeracao nome = "AGC1">
+  <!--   ===============Pontos de supervisao ===============-->
+    <!-- Pontos digitais e de comando-->
+    
+    <medidasAtuais>     <!-- Pontos de supervisão de Medida do inversor -->
+       <estadoChave>0</estadoChave> <!-- Estado da chave do ponto de conexao(aberto ou fechado)-->
+    </medidasAtuais>
+    
+        <!-- comando-->
+   <comando>
+    <estadoChave>0</estadoChave> <!-- Inicialmente tem que ser setado com valor 0-->
+    <potNominal>50</potNominal> 
+   </comando>  
+
+  
+      
+</agenteGeracao>
