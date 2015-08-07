@@ -25,6 +25,14 @@
       </AL1_R3>  
     </microrredes>
     
+     <outrosALs>
+        <AL2 chaveDeEncontro="CH_A"   />  
+      </outrosALs> 
+    
+    <outrosALs>
+         <AL2 chaveDeEncontro="CH_B"  />
+      </outrosALs>
+      
 		<quantChavesFechar valor = "0"/>
 		
 		<chavesDeTrajeto>  

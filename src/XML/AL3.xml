@@ -15,6 +15,10 @@
       </AL3_R1>  
     </microrredes>
 		
+      <outrosALs>
+        <AL2 chaveDeEncontro="CH_B"  />
+      </outrosALs>
+      
 		<ultima index = "1" /> <!-- índice da ultima chave do dominio desse AL-->
 		
 		<quantChavesFechar valor = "0"/>

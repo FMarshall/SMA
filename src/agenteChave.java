@@ -97,7 +97,8 @@ public class agenteChave extends Agent{
 					    addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
 					    	
 							private static final long serialVersionUID = 1L; //Posto automaticamente
-						    
+
+				    		
 							protected void handleAgree(ACLMessage agree){
 														
 //								exibirAviso(myAgent, "O valor da potencia gerada é: "+PotenciaGeracaoI);
@@ -113,15 +114,15 @@ public class agenteChave extends Agent{
 					    
 						
 					}// Fim do msg é curto
-					else { //Se não for curto, então para envio do valor de potência do trecho para atualização
+					else { //Se não for curto, então recebo o valor de potência do trecho para atualização
 						/*
 						 * Parte de medição e aquisição de dados e armazenamento no XML
 						 */
-						String conteudo = msg.getContent();  //Pego o conteudo da mensagem
-						exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+conteudo);
+						String carga = msg.getContent();  //Pego o conteudo da mensagem
+						exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+carga);
 						
 						//O conteudo do agente chave é somente o valor de corrente demandada no seu trecho
-						agenteCBD.getChild("carga").setText(conteudo);	//seta o XML do agente atualizando o valor da corrente demandada
+						agenteCBD.getChild("carga").setText(carga);	//seta o XML do agente atualizando o valor da corrente demandada
 						
 						/*
 						 * Parte de consulta ao XML e comando
@@ -132,6 +133,32 @@ public class agenteChave extends Agent{
 						ACLMessage resposta = msg.createReply();
 						resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
 						send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
+						
+						/********************************************************************************
+						 * FIPA Subscribe Initiator para informar o valor atual de carga demandada
+						 ********************************************************************************/	
+						ACLMessage msgInformarPot = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
+						msgInformarPot.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+						
+						msgInformarPot.setContent(carga);
+						
+						String AL = agenteChave.split("_")[0].split("AL")[0]; //Só para identificar o seu AL para poder se comunicar
+						exibirAviso(myAgent, "Vou informar o valor de carga demandada à "+AL);
+						msgInformarPot.addReceiver(new AID((String) AL, AID.ISLOCALNAME));
+											    
+					    addBehaviour(new SubscriptionInitiator(myAgent,msgInformarPot){
+					    	
+							protected void handleAgree(ACLMessage agree){
+														
+					    	}//Fim do handleAgree do Subscribe
+					
+							protected void handleRefuse(ACLMessage refuse) { //Se recusar
+								
+							}// Fim do handleRefuse do Subscribe
+							protected void handleFailure(ACLMessage failure) { //Se erro
+								
+							}// Fim do handleFailure do Subscribe
+					    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
 						
 					}// Fim do se é curto senão é para atualização do valor de potência nos trechos
 				}// Fim do if para saber se mensagem != null
@@ -176,6 +203,33 @@ public class agenteChave extends Agent{
 				return resposta;
 			}// Fim do protected ACLMessage prepareResponse
 		} );//Fim do request responder 
+		
+//		/********************************************************************************
+//		 * FIPA Subscribe Initiator para informar o valor atual de carga demandada
+//		 ********************************************************************************/	
+//		ACLMessage msgInformarPot = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
+//		msgInformarPot.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+//		
+//		String carga = agenteCBD.getChildText("carga"); //Carga do trecho monitorado
+//		msgInformarPot.setContent(carga);
+//		
+//		String AL = getLocalName().split("_")[0]; //Só para identificar o seu AL para poder se comunicar
+//		exibirAviso(this, "Vou informar o valor de carga demandada à "+AL);
+//		msgInformarPot.addReceiver(new AID((String) AL, AID.ISLOCALNAME));
+//							    
+//	    addBehaviour(new SubscriptionInitiator(this,msgInformarPot){
+//	    	
+//			protected void handleAgree(ACLMessage agree){
+//										
+//	    	}//Fim do handleAgree do Subscribe
+//	
+//			protected void handleRefuse(ACLMessage refuse) { //Se recusar
+//				
+//			}// Fim do handleRefuse do Subscribe
+//			protected void handleFailure(ACLMessage failure) { //Se erro
+//				
+//			}// Fim do handleFailure do Subscribe
+//	    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
 
 }//Fim do setup
 	
