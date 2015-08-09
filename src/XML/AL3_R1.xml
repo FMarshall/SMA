@@ -4,7 +4,7 @@
 <agenteAC nome = "AL3_R1"> 
 	
 	<agenteAL> AL3 </agenteAL>   <!-- Agente AL ao qual pertence --> 
-	<estado> fechada </estado>   <!-- Estado atual da chave, se ta aberta ou fechada -->
+	<estado>1</estado>   <!-- Estado atual da chave, se ta aberta ou fechada -->
 	<atuacao> f0 </atuacao>   <!-- Pode ser nao, falta1(curto principal), falta2(curto secundário),falta3(curto terciário) ou manobra-->
 	<carga>0</carga>   <!-- ultimo valor de carregamento, que pode ser a potencia perdida naquele trecho-->
 	<!--<quantChaves> 0 </quantChaves> -->

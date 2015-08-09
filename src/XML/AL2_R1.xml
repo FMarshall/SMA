@@ -3,7 +3,7 @@
 
 <agenteAC nome = "AL2_R1"> 
     <agenteAL> AL2 </agenteAL>   <!-- Agente AL ao qual pertence --> 
-    <estado> fechada </estado>   <!-- Estado atual da chave, se ta aberta ou fechada -->
+    <estado>1</estado>   <!-- Estado atual da chave, se ta aberta ou fechada -->
     <carga>0 </carga>    <!-- ultimo valor de carregamento, que pode ser a potencia perdida naquele trecho-->
     <trecho >4</trecho> <!-- Saber qual trecho esta sendo monitorado-->
     <comando>1</comando>

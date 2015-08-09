@@ -65,18 +65,34 @@ public class agenteChave extends Agent{
 		final String agenteChave = getLocalName();
 		final Element agenteCBD = carregaBD(agenteChave);
 		
-		final MessageTemplate fitro_Inform = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchContent("curto"));
+//		final MessageTemplate fitro_Inform = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchContent("curto"));
+		final MessageTemplate fitro_Inform = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		
 		final MessageTemplate filtroAbrir = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
   		MessageTemplate.MatchContent("abra")); 
 		
 	
 		addBehaviour(new TickerBehaviour(this,100) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void onTick(){
 				ACLMessage msg = receive(fitro_Inform);
+				
 				if(msg != null){
 					exibirMensagem(msg);
-	
+					String conteudo = msg.getContent();
+//					exibirAviso(myAgent, "O conteudo da mensagem é: "+msg.getContent());
+					exibirAviso(myAgent, "O conteudo da mensagem é: "+conteudo);
+					
+//					String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
+//					
+//					ACLMessage resposta = msg.createReply();
+//					resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
+//				    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
+					
 					if(msg.getContent().equalsIgnoreCase("curto")) {
 						exibirAviso(myAgent, "detectei um curto");
 						
@@ -96,7 +112,7 @@ public class agenteChave extends Agent{
 											    
 					    addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
 					    	
-							private static final long serialVersionUID = 1L; //Posto automaticamente
+//							private static final long serialVersifinal onUID = 1L; //Posto automaticamente
 
 				    		
 							protected void handleAgree(ACLMessage agree){
@@ -112,59 +128,96 @@ public class agenteChave extends Agent{
 							}// Fim do handleFailure do Subscribe
 					    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
 					    
+					    /*
+						 * Parte de consulta ao XML e comando
+						 * O camando será enviado como resposta ao inform da medição para o Matlab
+						 */
+						String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
+						exibirAviso(myAgent, "O comando da chave é: "+comandoChave);							
+						ACLMessage resposta = msg.createReply();
+						resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
+					    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
 						
 					}// Fim do msg é curto
 					else { //Se não for curto, então recebo o valor de potência do trecho para atualização
-						/*
-						 * Parte de medição e aquisição de dados e armazenamento no XML
-						 */
-						String carga = msg.getContent();  //Pego o conteudo da mensagem
-						exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+carga);
+						//Mas primeiro analisa-se se já não há houve atuação da chave. Se já tiver havido atuação, ela não manda nada para poder o AL utilizar dados pré-falta
+						String estado = agenteCBD.getChildText("estado");
+						exibirAviso(myAgent, "O estado de minha chave é: "+estado);
+						if(estado.equals("1")){
+							/*
+							 * Parte de medição e aquisição de dados e armazenamento no XML
+							 */
+							String carga = msg.getContent();  //Pego o conteudo da mensagem que veio do inform do matalab
+							exibirAviso(myAgent, "Recebi um valor de carg de: "+carga);
+							
+							//O conteudo do agente chave é somente o valor de corrente demandada no seu trecho
+							agenteCBD.getChild("carga").setText(carga);	//seta o XML do agente atualizando o valor da corrente demandada
+													
+							/********************************************************************************
+							 * FIPA Subscribe Initiator para informar o valor atual de carga demandada
+							 ********************************************************************************/	
+							ACLMessage msgInformarPot = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
+							msgInformarPot.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+							
+							msgInformarPot.setContent(carga);
+							
+							String AL = agenteChave.split("_")[0]; //Só para identificar o seu AL para poder se comunicar
+							exibirAviso(myAgent, "Vou informar o valor de carga demandada à "+AL);
+							msgInformarPot.addReceiver(new AID((String) AL, AID.ISLOCALNAME));
+												    
+						    addBehaviour(new SubscriptionInitiator(myAgent,msgInformarPot){
+						    	
+								protected void handleAgree(ACLMessage agree){
+															
+						    	}//Fim do handleAgree do Subscribe
 						
-						//O conteudo do agente chave é somente o valor de corrente demandada no seu trecho
-						agenteCBD.getChild("carga").setText(carga);	//seta o XML do agente atualizando o valor da corrente demandada
+								protected void handleRefuse(ACLMessage refuse) { //Se recusar
+									
+								}// Fim do handleRefuse do Subscribe
+								protected void handleFailure(ACLMessage failure) { //Se erro
+							
+				
+								}// Fim do handleFailure do Subscribe
+
+						    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
+						   
+						    /*
+							 * Parte de consulta ao XML e comando
+							 * O camando será enviado como resposta ao inform da medição para o Matlab
+							 */
+							String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
+							exibirAviso(myAgent, "O comando da chave é: "+comandoChave);						
+							ACLMessage resposta = msg.createReply();
+							resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
+						    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
+							
+						}// Fim do se é curto, senão é para atualização do valor de potência nos trechos
+						else{// Se a chave não estiver aberta, não vou enviar nada para o AL (o AL tem que analisar dados pré-falta), mas tenho que pelo menos retornar algo ao matlab
+							/*
+							 * Parte de consulta ao XML e comando
+							 * O camando será enviado como resposta ao inform da medição para o Matlab
+							 */
+							String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
+							exibirAviso(myAgent, "O comando da chave é: "+comandoChave);						
+							ACLMessage resposta = msg.createReply();
+							resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
+						    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
+						}
 						
-						/*
-						 * Parte de consulta ao XML e comando
-						 * O camando será enviado como resposta ao inform da medição. 
-						 */
-						String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
-												
-						ACLMessage resposta = msg.createReply();
-						resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
-						send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
+					}//Fim do if para saber se estado da chave está fechada
 						
-						/********************************************************************************
-						 * FIPA Subscribe Initiator para informar o valor atual de carga demandada
-						 ********************************************************************************/	
-						ACLMessage msgInformarPot = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
-						msgInformarPot.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
 						
-						msgInformarPot.setContent(carga);
-						
-						String AL = agenteChave.split("_")[0].split("AL")[0]; //Só para identificar o seu AL para poder se comunicar
-						exibirAviso(myAgent, "Vou informar o valor de carga demandada à "+AL);
-						msgInformarPot.addReceiver(new AID((String) AL, AID.ISLOCALNAME));
-											    
-					    addBehaviour(new SubscriptionInitiator(myAgent,msgInformarPot){
-					    	
-							protected void handleAgree(ACLMessage agree){
-														
-					    	}//Fim do handleAgree do Subscribe
-					
-							protected void handleRefuse(ACLMessage refuse) { //Se recusar
-								
-							}// Fim do handleRefuse do Subscribe
-							protected void handleFailure(ACLMessage failure) { //Se erro
-								
-							}// Fim do handleFailure do Subscribe
-					    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
-						
-					}// Fim do se é curto senão é para atualização do valor de potência nos trechos
+//					/*
+//					 * Parte de consulta ao XML e comando
+//					 * O camando será enviado como resposta ao inform da medição para o Matlab
+//					 */
+//					String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
+//											
+//					ACLMessage resposta = msg.createReply();
+//					resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
+//				    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
+//					
 				}// Fim do if para saber se mensagem != null
-				
-				
-				
 			}//Final do m�todo action do addBehaviour
 	    });//Final do comportamento addBehaviour(cyclic Behaviour)
 		
@@ -199,6 +252,7 @@ public class agenteChave extends Agent{
 				
 				//Antes seto no XML que o agente chave irá comandar a abertura da sua chave quando for responder ao inform de monitoramento do matlab
 				agenteCBD.getChild("comando").setText("0");
+				agenteCBD.getChild("estado").setText("0");   //Era pro agente chave medir isso no começo do inform para medição
 				
 				return resposta;
 			}// Fim do protected ACLMessage prepareResponse

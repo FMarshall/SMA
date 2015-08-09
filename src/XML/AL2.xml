@@ -6,9 +6,9 @@
 		<estado>disponivel</estado>
 		
 		<chaves> <!-- Chaves normais -->
-			<AL2_R1 atuacao = "nao" estado = "fechada" carga = "160" sentido = "+" trecho = "4" />  
-			<AL2_R2 atuacao = "nao" estado = "fechada"  carga = "80" sentido = "+" trecho = "3" />
-			<AL2_R3 atuacao = "nao" estado = "fechada"  carga = "40" sentido = "+" trecho = "2"/>
+			<AL2_R1 atuacao = "nao" estado = "fechada" carga = "0" sentido = "+" trecho = "4" />  
+			<AL2_R2 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "3" />
+			<AL2_R3 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "2"/>
 		</chaves>
 		
     <microrredes>
