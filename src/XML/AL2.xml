@@ -6,9 +6,9 @@
 		<estado>disponivel</estado>
 		
 		<chaves> <!-- Chaves normais -->
-			<AL2_R1 atuacao = "nao" estado = "fechada" carga = "0" sentido = "+" trecho = "4" />  
-			<AL2_R2 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "3" />
-			<AL2_R3 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "2"/>
+			<AL2_R1 atuacao = "nao" estado = "fechada" carga = "0" sentido = "+" trecho = "4" capacidade="215" />  
+			<AL2_R2 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "3" capacidade="215" />
+			<AL2_R3 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "2" capacidade="215" />
 		</chaves>
 		
     <microrredes>
@@ -30,9 +30,7 @@
         <AL3 chaveDeEncontro="CH_B"  />
       </outrosALs>
 		
-		<ultima index = "3" /> 
-		
-		<quantChavesFechar valor = "0"/>
+    <limFonte>500000</limFonte> <!-- Capacidade do AL1 -->		
 		
 		<chavesDeTrajeto>  
 			<AL1>
@@ -40,9 +38,7 @@
 					<chave nome = "CH_A" ativa = "D0" atuacao = "f0" estado ="aberta" carregamento = "0" />
 				</chaveDeEncontro>
 				
-				<chaveNormal indicativo = "nao" nomeAL = "nenhum"> 
-					<chave nome = "nenhum" />						
-				</chaveNormal> 
+			
 			
 				<trechos indicativo = "nao"> 
 					<trecho nome = "nenhum" />
@@ -95,7 +91,7 @@
 			<Al3 prioridade = "2" />
 		</prioridade_pedido>
 		
-		<limFonte valor = "20"/> <!-- Capacidade do AL1 -->
+		
 		<limCondutor valor = "20" nome = "AL2_R2"/> <!-- entende-se que na hora de ajudar so teremos sentido + -->
 		<cargaDemandadaTotal valor = "0"/>
 		

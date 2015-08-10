@@ -3,12 +3,13 @@
 <!-- ..:: Banco de dados modelo de um AGENTE ALIMENTADOR (AL) ::..-->
 
 <agenteAL nome = "AL1">
+
 		<estado>disponivel</estado>
 		
 		<chaves> <!-- Chaves normais -->
-			<AL1_R1 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "7"  />   
-			<AL1_R2 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "6" />
-			<AL1_R3 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "5" />
+			<AL1_R1 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "7"  capacidade="266"/>   
+			<AL1_R2 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "6" capacidade="215"/>
+			<AL1_R3 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "5" capacidade="215" />
 		</chaves>
 		
    <microrredes>
@@ -33,7 +34,7 @@
          <AL2 chaveDeEncontro="CH_B"  />
       </outrosALs>
       
-		<quantChavesFechar valor = "0"/>
+	  <limFonte>500000</limFonte>
 		
 		<chavesDeTrajeto>  
 		
@@ -75,51 +76,5 @@
 			</AL3> 
 			
 		</chavesDeTrajeto>
-		
-		<prioridade_ajuda>
-		 <!-- nao esta sendo usado ainda. Essa tag do i_AL2 sera tirada, pois e a parte do limite do condutor-->   
-			<AL2 prioridade = "1" i_AL2 = "6"/>
-			<Al3 prioridade = "2" i_AL3 = "8"/>
-		</prioridade_ajuda>
-		
-		<outrosALs>
-			<nome> AL2 </nome>
-			<nome> AL3 </nome>
-		</outrosALs>
-		
-		<suasChaves>
-			<nome> AL1_R1 </nome>
-			<nome> AL1_R2 </nome>
-			<nome> AL1_R3 </nome>
-		</suasChaves>
-		
-		<prioridade_pedido>
-		<!-- Ainda sera usado-->
-			<AL2 prioridade = "1" />
-			<Al3 prioridade = "2" />
-		</prioridade_pedido>
-		
-		<limFonte valor = "5"/> <!-- Capacidade do AL1-->
-		<limCondutor valor = "4" nome = "AL1_R3"/> <!-- entende-se que na hora de ajudar so teremos sentido + -->
-		<cargaDemandadaTotal valor = "0"/>
-		
-		<cargaPerdidaTotal valor = "0"/>
-		<cargaPerdida valor = "0"/>
-		
-		<suprimentoDeCarga status = "normal"> <!-- Aqui fica as cargas doadas ou recebidas de outros ALs. Pode ser: normal, doando, recebendo -->
-			<AL2>
-				<carga valor = "0" />
-			</AL2>
-			
-			<AL3>
-				<carga valor = "0" />
-			</AL3>
-		</suprimentoDeCarga>
-		
-		<trechos>
-			<trecho7 capacidade = "10"/>
-			<trecho6 capacidade = "10"/>
-			<trecho5 capacidade = "10"/>
-		</trechos>
 		
 </agenteAL>

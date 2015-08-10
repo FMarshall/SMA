@@ -6,7 +6,7 @@
 		<estado>disponivel</estado>
 		
 		<chaves> <!-- Chaves normais -->
-			<AL3_R1 atuacao = "nao" estado = "fechada" carga = "1" sentido = "+" trecho = "1"/>   
+			<AL3_R1 atuacao = "nao" estado = "fechada" carga = "1" sentido = "+" trecho = "1" capacidade="215"/>   
 		</chaves>
 		
 		<microrredes>
@@ -18,9 +18,9 @@
       <outrosALs>
         <AL2 chaveDeEncontro="CH_B"  />
       </outrosALs>
-      
-		<ultima index = "1" /> <!-- índice da ultima chave do dominio desse AL-->
-		
+
+		  <limFonte>500000</limFonte>
+		  
 		<quantChavesFechar valor = "0"/>
 		
 		<chavesDeTrajeto> 

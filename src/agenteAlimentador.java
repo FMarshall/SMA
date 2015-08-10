@@ -18,6 +18,7 @@ import jade.domain.FIPAAgentManagement.FailureException;
 import jade.core.behaviours.Behaviour;
 //import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.util.leap.ArrayList;
 
 import java.io.File;
@@ -316,7 +317,7 @@ public class agenteAlimentador extends Agent {
 								}
 							}); //Fim do addBehcaviour do Request para avisar os agentes chave que abram
 					    }
-					    
+					
 					    /*Aqui eu vou calcular o valor de potencia perdida consultando o XML. 
 					     * Se preciso, coloco aquele comportamento que faz o agente dormir um pouco para depois executar a instrução desejada
 					     * */
@@ -334,6 +335,7 @@ public class agenteAlimentador extends Agent {
 						*********************************************************************************/
 					    exibirAviso(myAgent, "O valor da carga perdida dos trechos é: "+cargaPerdida+". O valor das microrredes são: "+cargaTotalDisponivelMicrorrede);
 					    double cargaTotalPerdida = cargaPerdida + cargaTotalDisponivelMicrorrede; 
+					    //Tenho que zerar esse valor depois
 					    
 					    final ACLMessage negociarDeltaP = new ACLMessage(ACLMessage.CFP);
 						List lista3 = agenteALBD.getChild("outrosALs").getChildren(); 
@@ -530,46 +532,93 @@ public class agenteAlimentador extends Agent {
 		 ********************************************************************************************************/
 		addBehaviour(new ContractNetResponder(this, filtroContractNet) {
 			
-			
 			private static final long serialVersionUID = 1L;
 
 			protected ACLMessage handleCfp(ACLMessage cfp) throws NotUnderstoodException, RefuseException {
+				/* 1 Saber carga própria (nesse caso sempre será a da primeira chave)
+				 * 2 Ver limite da fonte limFonte >= Ipropria + Imultua?
+				 * 3 Analisa trecho por trecho para ver se não haverá sobrecarga 
+				 */
+				//Saber a própria carga. Sempre será a da primeira chave, visto que não está sendo analisado faltas duplas
+				String agenteChave1 = getLocalName().concat("_R1");	//saber a carga do primeiro agente chave			
+				double cargaPropria = Double.parseDouble(agenteALBD.getChild("chaves").getChild(agenteChave1).getAttributeValue("carga"));
 				
-								
-				double cargaTotalDisponivel = 0;
+				//Carga solicitada por outro Alimentador
+				double cargaSolicitada = Double.parseDouble(cfp.getContent());
+				double cargaDisponivel = 0; //por enquanto a carga disponível é zero. A tendência é rejeitar ajuda num primeiro momento antes de começar a análise
 				
-				ArrayList minhasCargas = new ArrayList();
-				minhasCargas.add("0"); //a posição zero da array terá o valor "0".
+				//Analisar se a fonte é capaz de suprir tudo 
+				double limFonte = Double.parseDouble(agenteALBD.getChildText("limFonte"));
 				
-				//*********Verificar as cargas de cada trecho e add no vetor
-				List lista = agenteALBD.getChild("chaves").getChildren(); 
-				Iterator i = lista.iterator();
-				
-				int cont = 0; //Aproveito e já conto a quantidade de elementos que eu estou lidando
-				
-			    while(i.hasNext()) { 
-			    	Element elemento = (Element) i.next();
-			    	String nome = String.valueOf(elemento.getName());
-			    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-			    		String cargaDoTrecho = elemento.getAttributeValue("carga");
-			    		minhasCargas.add(cargaDoTrecho);
-			    		
-			    		cargaTotalDisponivel = cargaTotalDisponivel + Double.parseDouble(cargaDoTrecho);
-			    		cont = cont+1;
-			    	}
-			    }
-				
-			    double cargaSolicitada = Double.parseDouble(cfp.getContent()); //Carga solicitada por outro AL	
-			    double cargaTotalNoTrecho = 0;
-			    double cargaTrecho = 0;
-			    
-			  //*********Verificar se há sobrecarga
-				for (int j = 0; j < cont+1; j++){
-//					double capa
+				if(limFonte >= cargaPropria + cargaSolicitada){ //A fonte é capaz de suprir tudo?
+					exibirAviso(myAgent, "A minha fonte de valor >"+limFonte+" pode suprir a carga solicitada de >"+cargaSolicitada);
+					cargaDisponivel = cargaSolicitada; //Se a fonte puder suprir tudo, então a carga disponível é toda a carga solicitada
 					
+					//Verificar agora se não há sobrecargas em cada trecho
+					List lista = agenteALBD.getChild("chaves").getChildren(); 
+					Iterator i = lista.iterator();
 					
+				    while(i.hasNext()) { 
+				    	Element elemento = (Element) i.next();
+				    	String nome = String.valueOf(elemento.getName());
+				    	
+				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML
+				    		double cargaDoTrecho = Double.parseDouble(elemento.getAttributeValue("carga"));
+				    		double capacidadeDoCondutor = Double.parseDouble(elemento.getAttributeValue("capacidade"));
+				    		
+				    		if(capacidadeDoCondutor >= cargaDoTrecho + cargaSolicitada){
+				    			exibirAviso(myAgent, "Não há sobrecarga no meu trecho. ");
+				    		}
+				    		else{
+				    			exibirAviso(myAgent, "Há sobrecarga no meu trecho com os valores solicitados. ");
+				    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
+				    		}
+				    		
+				    	}// Fim do if (nome!= null && nome.length()>0 && nome!= "nenhum")
+				    }// Fim do while
+					
+				}// Fim do if(limFonte >= cargaPropria + cargaSolicitada)
+				else{ //Se não puder suprir tudo, ele deverá suprir pelo menos uma parte
+					exibirAviso(myAgent, "Não posso suprir todo o valor solicitado que é de >"+cargaSolicitada+", mas posso suprir >");
+					
+					cargaSolicitada = (limFonte - cargaPropria)*0.9; //A carga solicitada passa a ser só o que o AL é capaz de suprir
+					
+					//Verificar agora se não há sobrecargas em cada trecho com o valor de carga solicitada recalculado
+					List lista = agenteALBD.getChild("chaves").getChildren(); 
+					Iterator i = lista.iterator();
+					
+				    while(i.hasNext()) { 
+				    	Element elemento = (Element) i.next();
+				    	String nome = String.valueOf(elemento.getName());
+				    	
+				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML
+				    		double cargaDoTrecho = Double.parseDouble(elemento.getAttributeValue("carga"));
+				    		double capacidadeDoCondutor = Double.parseDouble(elemento.getAttributeValue("capacidade"));
+				    		
+				    		if(capacidadeDoCondutor >= cargaDoTrecho + cargaSolicitada){
+				    			exibirAviso(myAgent, "Não há sobrecarga no meu trecho. ");
+				    		}
+				    		else{
+				    			exibirAviso(myAgent, "Há sobrecarga no meu trecho com os valores solicitados. ");
+				    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
+				    		}
+				    		
+				    	}// Fim do if (nome!= null && nome.length()>0 && nome!= "nenhum")
+				    }// Fim do while
 				}
-			    
+				
+				
+//			    double cargaSolicitada = Double.parseDouble(cfp.getContent()); //Carga solicitada por outro AL	
+//			    double cargaTotalNoTrecho = 0;
+//			    double cargaTrecho = 0;
+//			    
+//			  //*********Verificar se há sobrecarga
+//				for (int j = 0; j < cont+1; j++){
+////					double capa
+//					
+//					
+//				}
+//			    
 			    
 //				return cfp;
 ////				System.out.println("Agent "+getLocalName()+": CFP received from "+cfp.getSender().getName()+". Action is "+cfp.getContent());
@@ -586,7 +635,7 @@ public class agenteAlimentador extends Agent {
 					ACLMessage propose = cfp.createReply();
 					propose.setPerformative(ACLMessage.PROPOSE);
 //					propose.setContent(String.valueOf(valorSOC));
-					propose.setContent(cfp.getContent());
+					propose.setContent(String.valueOf(cargaDisponivel));
 					return propose;
 //				}
 //				else {

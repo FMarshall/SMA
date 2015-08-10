@@ -223,7 +223,7 @@ public class agenteChave extends Agent{
 		
 		/*************************************************************************
 		 * FIPA Request Responder para responder a solicitação do AL para abrir
-		 **************************************************************************/
+		 *********************************************************************				resposta.setContent("Ok");*****/
 		addBehaviour(new AchieveREResponder(this, filtroAbrir) {
 			/**
 			 * 
@@ -249,6 +249,8 @@ public class agenteChave extends Agent{
 				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
 				ACLMessage resposta = request.createReply();
+				resposta.setPerformative(ACLMessage.AGREE);
+				resposta.setContent("ok");
 				
 				//Antes seto no XML que o agente chave irá comandar a abertura da sua chave quando for responder ao inform de monitoramento do matlab
 				agenteCBD.getChild("comando").setText("0");
