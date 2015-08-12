@@ -14,25 +14,22 @@
 		
    <microrredes>
       <AL1_R1>
-          <nenhum  potenciaDisponivel="0"   />
+          <nenhum  potenciaDisponivel="0"  boost="0" />
       </AL1_R1>  
          
       <AL1_R2>
-          <nenhum  potenciaDisponivel="0"   />
+          <nenhum  potenciaDisponivel="0" boost="0"  />
       </AL1_R2>
       
       <AL1_R3>
-          <nenhum potenciaDisponivel="0"   />
+          <nenhum potenciaDisponivel="0"  boost="0" />
       </AL1_R3>  
     </microrredes>
     
      <outrosALs>
-        <AL2 chaveDeEncontro="CH_A"   />  
+        <AL2 chaveDeEncontro="AE_12"  chaveFronteira = "AL1_R3" />  
       </outrosALs> 
-    
-    <outrosALs>
-         <AL2 chaveDeEncontro="CH_B"  />
-      </outrosALs>
+
       
 	  <limFonte>500000</limFonte>
 		

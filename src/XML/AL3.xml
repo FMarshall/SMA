@@ -11,12 +11,12 @@
 		
 		<microrredes>
       <AL3_R1>
-          <nenhum  potenciaDisponivel="0"   />
+          <nenhum  potenciaDisponivel="0" boost="0"/>
       </AL3_R1>  
     </microrredes>
 		
       <outrosALs>
-        <AL2 chaveDeEncontro="CH_B"  />
+        <AL2 chaveDeEncontro="AE_23" chaveFronteira = "AL3_R1" />
       </outrosALs>
 
 		  <limFonte>500000</limFonte>

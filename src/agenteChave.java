@@ -71,6 +71,8 @@ public class agenteChave extends Agent{
 		final MessageTemplate filtroAbrir = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
   		MessageTemplate.MatchContent("abra")); 
 		
+		final MessageTemplate filtroFechar = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+		  		MessageTemplate.MatchContent("fechar")); 
 	
 		addBehaviour(new TickerBehaviour(this,100) {
 			/**
@@ -255,6 +257,46 @@ public class agenteChave extends Agent{
 				//Antes seto no XML que o agente chave irá comandar a abertura da sua chave quando for responder ao inform de monitoramento do matlab
 				agenteCBD.getChild("comando").setText("0");
 				agenteCBD.getChild("estado").setText("0");   //Era pro agente chave medir isso no começo do inform para medição
+				
+				return resposta;
+			}// Fim do protected ACLMessage prepareResponse
+		} );//Fim do request responder 
+		
+		
+		/*************************************************************************
+		 * FIPA Request Responder para responder a solicitação do AL para fechar
+		 *********************************************************************				resposta.setContent("Ok");*****/
+		addBehaviour(new AchieveREResponder(this, filtroFechar) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+//				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				if (checkAction()) {
+//					// We agree to perform the action. Note that in the FIPA-Request
+//					// protocol the AGREE message is optional. Return null if you
+//					// don't want to send it.
+//					System.out.println("Agent "+getLocalName()+": Agree");
+//					ACLMessage agree = request.createReply();
+//					agree.setPerformative(ACLMessage.AGREE);
+//					return agree;
+//				}
+//				else {
+//					// We refuse to perform the action
+//					System.out.println("Agent "+getLocalName()+": Refuse");
+//					throw new RefuseException("check-failed");
+//				}
+				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+				
+				ACLMessage resposta = request.createReply();
+				resposta.setPerformative(ACLMessage.AGREE);
+				resposta.setContent("ok");
+				
+				//Antes seto no XML que o agente chave irá comandar a abertura da sua chave quando for responder ao inform de monitoramento do matlab
+				agenteCBD.getChild("comando").setText("1");
+				agenteCBD.getChild("estado").setText("1");   //Era pro agente chave medir isso no começo do inform para medição
 				
 				return resposta;
 			}// Fim do protected ACLMessage prepareResponse

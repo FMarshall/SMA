@@ -3,8 +3,10 @@
 <!--Banco de Dados do Agente PC-->
 
 <agentePC  nome = "APC1">   <!-- Pode ser que seja necessario usar um nome local e um nome global. O nome global eh para os agentes dispositivos -->
-		
+		 <agenteAlimentador>AL2</agenteAlimentador>
+      <agenteChave>AL2_R2</agenteChave>
     <!-- Pontos de Medida -->
+    
     <medidasAtuais>
          <!-- Pontos digitais e de comando-->
          <estadoChave>1</estadoChave><!-- Indica se a a uRede esta conectada ou nao a rede-->         

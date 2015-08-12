@@ -41,7 +41,7 @@ import org.jdom2.input.SAXBuilder;
 
 public class agenteAlimentador extends Agent {
 
-	double cargaPerdida, cargaTotalDisponivelMicrorrede = 0;
+	double cargaPerdida, cargaTotalDisponivelMicrorrede,cargaTotalPerdida = 0;
 	
 	public void setup(){
 		//Pega o nome do agente no Banco de Dados
@@ -93,7 +93,7 @@ public class agenteAlimentador extends Agent {
 				String conteudo = subscription.getContent();
 				
 				if(conteudo.equals("falta")){
-					exibirAviso(myAgent, "Fui informado de uma falta #########################################################################");
+					exibirAviso(myAgent, "Fui informado de uma falta ###################################################################################################################################################");
 										
 					//Atualizar  o XML para saber onde foi a falta
 					String agenteChaveSobFalta = subscription.getSender().getLocalName();
@@ -103,7 +103,7 @@ public class agenteAlimentador extends Agent {
 					exibirAviso(myAgent, "A referência do agente chave é "+referencia);
 					
 //					String referenciaDaChave = referencia.split("R")[1];
-					int referenciaDaChaveAtuante =Integer.parseInt(referencia.split("R")[1]); //Só para pegar o número do agente chave para avisar somente os ajusante
+					final int referenciaDaChaveAtuante =Integer.parseInt(referencia.split("R")[1]); //Só para pegar o número do agente chave para avisar somente os ajusante
 					exibirAviso(myAgent, "A chave atuante é: "+referenciaDaChaveAtuante);
 					
 					//*********Saber se tem agente chave e quantos são
@@ -321,111 +321,463 @@ public class agenteAlimentador extends Agent {
 					    /*Aqui eu vou calcular o valor de potencia perdida consultando o XML. 
 					     * Se preciso, coloco aquele comportamento que faz o agente dormir um pouco para depois executar a instrução desejada
 					     * */
-					    //Vou percorrer a tag "chaves" no XML
-					    //Vou pegando o valor de carga de cada chave
-					    //Vou somando dentro do while
-					    
-					    //vou percorrer a tag "microrredes" pegando o valor de cada potencia disponivel das microrredes
-					    //vou somando cada potência disponível de cada microrrede
-					    
-					    //Pensando bem, acho que dá pra fazer isso no método anterior. Se eu não fizer isso nas rotinas anteriores, vou fazer semelhante a elas de qualquer forma.
-					    /*********************************************************************************
-					     * Aqui é porque eu tenho certeza que há outros ALs, se não eu tenho que verificar a quantidade antes
-						 * FIPA Contract Net Initiator para negociação com dispositivos de geração controlada
-						*********************************************************************************/
-					    exibirAviso(myAgent, "O valor da carga perdida dos trechos é: "+cargaPerdida+". O valor das microrredes são: "+cargaTotalDisponivelMicrorrede);
-					    double cargaTotalPerdida = cargaPerdida + cargaTotalDisponivelMicrorrede; 
-					    //Tenho que zerar esse valor depois
-					    
-					    final ACLMessage negociarDeltaP = new ACLMessage(ACLMessage.CFP);
-						List lista3 = agenteALBD.getChild("outrosALs").getChildren(); 
-						Iterator i3 = lista3.iterator();
-						
-					    while(i3.hasNext()) {
-					    	Element elemento = (Element) i3.next();
-					    	String nome = String.valueOf(elemento.getName());
-							
-					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
-//															System.out.println("Entrou no if!!!!!");  //Só pra testar
-					    		exibirAviso(myAgent, "Solicitando a " +nome+ "um valor de carga perdida igual à: "+cargaTotalPerdida);
-					    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
-					    	}
-					    }	
-					    
-					    negociarDeltaP.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-					    negociarDeltaP.setContent(String.valueOf(cargaTotalPerdida)); 
-					    
-					    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
-							
-							protected void handlePropose(ACLMessage propose, Vector v) {
-								exibirMensagem(propose);
+					    addBehaviour(new WakerBehaviour(myAgent, 1000) {
+					    	protected void handleElapsedTimeout() {
+					    		
+					    		
+					    		 //Vou percorrer a tag "chaves" no XML
+							    //Vou pegando o valor de carga de cada chave
+							    //Vou somando dentro do while
+							    
+							    //vou percorrer a tag "microrredes" pegando o valor de cada potencia disponivel das microrredes
+							    //vou somando cada potência disponível de cada microrrede
+							    
+							    //Pensando bem, acho que dá pra fazer isso no método anterior. Se eu não fizer isso nas rotinas anteriores, vou fazer semelhante a elas de qualquer forma.
+							    /*********************************************************************************
+							     * Aqui é porque eu tenho certeza que há outros ALs, se não eu tenho que verificar a quantidade antes
+								 * FIPA Contract Net Initiator para negociação 
+								*********************************************************************************/
+							    exibirAviso(myAgent, "O valor da carga perdida dos trechos é: "+cargaPerdida+". O valor das microrredes são: "+cargaTotalDisponivelMicrorrede);
+							    cargaTotalPerdida = cargaPerdida + cargaTotalDisponivelMicrorrede; 
+							    //Tenho que zerar esse valor depois
+							    
+							    final ACLMessage negociarDeltaP = new ACLMessage(ACLMessage.CFP);
+								List lista3 = agenteALBD.getChild("outrosALs").getChildren(); 
+								Iterator i3 = lista3.iterator();
 								
-//													ACLMessage reply = propose.createReply();
-//													reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-//													v.addElement(reply);
-							}
-							
-							protected void handleRefuse(ACLMessage refuse) {
-								exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
-								
-////												System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
-//													
-//													ACLMessage aviso = negociarDeltaP.createReply();
-//													aviso.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-//													aviso.setPerformative(ACLMessage.REFUSE);
-//													aviso.setContent("0");
-//													comando
-//													myAgent.send(aviso);
-							}
-							
-							protected void handleFailure(ACLMessage failure) {
-								if (failure.getSender().equals(myAgent.getAMS())) {
-									// Notificação de erro feita pela plataforma
-									exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
-								}
-								else {
-//									exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
-								}										
-							} //Fim do handleFailure
-							
-							protected void handleAllResponses(Vector responses, Vector acceptances) {
-
-								// Evaluate proposals.
-								double bestProposal = -1;
-//													AID bestProposer = null;
-								ACLMessage accept = null;
-								
-								Enumeration e = responses.elements();  //a variável "e" será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
-								while (e.hasMoreElements()) { //um while só pra percorrer todas as posições do vetor "e"
-									ACLMessage msgProposta = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
+							    while(i3.hasNext()) {
+							    	Element elemento = (Element) i3.next();
+							    	String nome = String.valueOf(elemento.getName());
 									
-									if (msgProposta.getPerformative() == ACLMessage.PROPOSE) { //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
-										ACLMessage resposta = msgProposta.createReply(); //será criada então uma resposta para essa mensagem
-										acceptances.addElement(resposta);
+							    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
+//																	System.out.println("Entrou no if!!!!!");  //Só pra testar
+							    		//Vou analisar quem é a chave fronteira com esse AL. Se o curto
+							    		String chaveFronteira = elemento.getAttributeValue("chaveFronteira");
+							    		int refChaveFronteira = Integer.parseInt(chaveFronteira.split("_")[1].split("R")[1]);
+							    		
+							    		if(refChaveFronteira>referenciaDaChaveAtuante){
+							    			exibirAviso(myAgent, "Solicitando a " +nome+ "um valor de carga perdida igual à: "+cargaTotalPerdida);
+								    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+							    		}
+							    	}
+							    }	
+							    
+							    negociarDeltaP.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+							    negociarDeltaP.setContent(String.valueOf(cargaTotalPerdida)); 
+							    
+							    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
+									
+									protected void handlePropose(ACLMessage propose, Vector v) {
+										exibirMensagem(propose);
+						
+//											ACLMessage reply = propose.createReply();
+//											reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//											v.addElement(reply);]
+									}
+									
+									protected void handleRefuse(ACLMessage refuse) {
+										exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
 										
-										double proposal = Double.parseDouble(msgProposta.getContent()); //Aqui ele pega a propostas para avaliá-la
-										if (proposal > bestProposal) {
-											bestProposal = proposal;
-//																bestProposer = msgProposta.getSender();
-//																
-											resposta.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
-
-//																accept = resposta;
-//																accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-										}else{
-											resposta.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como REject_PROPOSAL
+////														System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
+//															
+//															ACLMessage aviso = negociarDeltaP.createReply();
+//															aviso.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+//															aviso.setPerformative(ACLMessage.REFUSE);
+//															aviso.setContent("0");
+//															comando
+//															myAgent.send(aviso);
+									}
+									
+									protected void handleFailure(ACLMessage failure) {
+										if (failure.getSender().equals(myAgent.getAMS())) {
+											// Notificação de erro feita pela plataforma
 											
 										}
-									}//Fim do if msg.getPErformative() == ACLMessage.PROPOSE
-								}//Fim do while (e.hasMoreElements()) 
+										else {
+//											exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+										}										
+									} //Fim do handleFailure
+									
+									protected void handleAllResponses(Vector responses, Vector acceptances) {
+
+										// Evaluate proposals.
+										double bestProposal = -1;
+//															AID bestProposer = null;
+										ACLMessage accept = null;
+										
+										Enumeration e = responses.elements();  //a variável "e" será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
+										while (e.hasMoreElements()) { //um while só pra percorrer todas as posições do vetor "e"
+											ACLMessage msgProposta = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
+											
+											if (msgProposta.getPerformative() == ACLMessage.PROPOSE){ //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
+												ACLMessage resposta = msgProposta.createReply(); //será criada então uma resposta para essa mensagem
+												acceptances.addElement(resposta);
+												
+												double proposal = Double.parseDouble(msgProposta.getContent()); //Aqui ele pega a propostas para avaliá-la
+												if (proposal > bestProposal){
+													bestProposal = proposal;
+//																		bestProposer = msgProposta.getSender();
+//																		
+													resposta.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // seta a performativa logo como Reject_PROPOSAL
+													resposta.setContent(String.valueOf(bestProposal));
+//																		accept = resposta;
+//																		accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+												}else{
+													resposta.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como Reject_PROPOSAL
+													resposta.setContent(String.valueOf(proposal));
+												}
+											}//Fim do if msg.getPErformative() == ACLMessage.PROPOSE
+										}//Fim do while (e.hasMoreElements()) 
+																
+									}// Fim do handle all responses
+									
+									protected void handleInform(ACLMessage inform) {
+//										System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+										//Quando receber o "inform" começa a resomposição. O AL solicitante ou initiator começa então a as manobras
+										//Olho então quem foi mesmo o AL o qual foi aceito a proposto e olho no XML qual chave de encontro tenho que fechar
+										//Mas aqui eu já tenho que saber também que agente chaves têm que serem fechados
+										
+										/*
+										 * Antes de tudo isso, eu analiso se a melhor proposta pode suprir tudo
+										 * Se puder, vejo qual é o sender da mensagem que será o AL que irá ajudar e vejo que chave de encontro tenho que fechar
+										 * 
+										 * Se não puder ajudar com tudo, tenho que analisar trecho por trecho
+										 * Fao um while para ver quantas chaves são
+										 * Começo a analisar pelo trecho mais a jusante
+										 * Vejo potência perdida nesse trecho
+										 * 
+										 * potencia disponivel = getContent(propose)
+										 * if potencia disponivel do outro AL > Potencia perdida no trecho (i)  (se pelo menos isso)
+										 * 		potencia disponviel = potencia disponivel - potencia perdida no trecho (i)  (fica isso para o próximo trecho)
+										 * senão if Tem microrrede no trecho (i) 
+										 * 		if potencia disponivel + potencia microrrede (i) > potencia perdida no trecho (i)   (E com a ajuda dessa microrrede?
+										 * 			Ai ajuda até aqui, pois se não fosse a micrrorede não dava nem pra suprir esse trecho... imagine mais outro(s)
+										 * end		
+										 * 		
+										 * 
+										 * 	
+										 */
+										String ALParticipante = inform.getSender().getLocalName();
+										double cargaDiponivel = Double.parseDouble(inform.getContent());
+										
+										exibirAviso(myAgent, "Eu aceitei a proposta de "+ALParticipante+", e a carga que ele se dispôs a dar é "+cargaDiponivel+" sendo que preciso de "+cargaTotalPerdida);
+									
+										if(cargaDiponivel>=cargaTotalPerdida){
+											exibirAviso(myAgent, "A carga disponível "+cargaDiponivel+" é maior que "+cargaTotalPerdida);
+											
+											String chaveDeEncontro = agenteALBD.getChild("outrosALs").getChild(ALParticipante).getAttributeValue("chaveDeEncontro");
+											exibirAviso(myAgent, " Vou solicitar a chave de encontro "+chaveDeEncontro+" que feche.");
+											/**********************************************************************************
+										     * Protocolo FIPA Request para solicitar que a chave de encontro de alimentadores feche
+										     * 
+										     *********************************************************************************/
+									  		ACLMessage msg1 = new ACLMessage(ACLMessage.REQUEST);
+									  		msg1.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+									  		msg1.addReceiver(new AID((String) chaveDeEncontro, AID.ISLOCALNAME));	
+									  	
+										    msg1.setContent("fechar");
+									  		
+									  		addBehaviour(new AchieveREInitiator(myAgent, msg1) {
+												protected void handleInform(ACLMessage inform) {
+													System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+												}
+												protected void handleRefuse(ACLMessage refuse) {
+						//							System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
+						//							nResponders--;
+												}
+												protected void handleFailure(ACLMessage failure) {
+													if (failure.getSender().equals(myAgent.getAMS())) {
+														// FAILURE notification from the JADE runtime: the receiver
+														// does not exist
+														System.out.println("Responder does not exist");
+													}
+													else {
+														System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+													}
+												}
+												protected void handleAllResultNotifications(Vector notifications) {
+						//							if (notifications.size() < nResponders) {
+						//								// Some responder didn't reply within the specified timeout
+						//								System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
+						//							}
+												}
+											}); //Fim do addBehaviour do request initiator
+											
+										}//if(cargaDiponivel>cargaTotalPerdida)
+										else{//Se não for possível outro alimentador suprir tudo, então tem-se que analisar tirando trechos
+											//colocar ref chave atuante global
+											//for refChaveAtu + 1
+											//ver se tem microrredes desse trecho em diante e sew com microrredes da certo entao
+											// potMicrorrde + potDispo > potPerdida?
+											// se não, potPerdida  = potPerdida - refCahve
+											// potDispo > potPerdidaNova
+											
+//											//Cria-se uma lista para percorrer a tag CHAVES (agentes chave)
+//									  		List lista = agenteALBD.getChild("chaves").getChildren(); 
+//											Iterator i = lista.iterator();
+////											int cont = 0;					
+//											
+//										    while(i.hasNext()) { 
+//										    	Element elemento = (Element) i.next();
+//										    	String nome = String.valueOf(elemento.getName());
+//										    	
+////												exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
+//												
+//										    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+//										    		int referenciaDaChave = Integer.parseInt(nome.split("_")[1].split("R")[1]); //Analisa-se a posição da chave visada
+//										    		
+//										    		exibirAviso(myAgent, "A referência de "+nome+" é "+referenciaDaChave);
+//										    		
+//										    		if(referenciaDaChave>referenciaDaChaveAtuante){ //Se a chave analisada estiver localizada a jusante da chave atuante então
+//										    			exibirAviso(myAgent, "A referência de "+nome+" é maior que a da chave atuante que é "+referenciaDaChaveAtuante);
+////										    				cont=cont+1;
+//										    		
+//////										    			if(elemento.getAttributeValue("atuacao").equals("nao")){ //Se o agente chave não é o que atuou então vou mandar uma mensagem pra ele
+////											    			List lista1 = agenteALBD.getChild("microrredes").getChild(nome).getChildren(); 
+////															Iterator i1 = lista1.iterator();
+////										    				
+////										    				while(i1.hasNext()) { 
+////														    	Element elemento1 = (Element) i1.next();
+////														    	String nome1 = String.valueOf(elemento1.getName());
+////														    	
+////	//															exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
+////																
+////														    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+////														    	}
+////										    				}//Fim do segundo while
+////												    		cargaPerdida = 0; //Acho que nem precisa disso não
+////										    			}// Fim do if para saber se atuou ou não
+//										    		}// Fim do if para saber se referenciaDaChave>referenciaDaChaveAtuante
+//										    	}// Fim do if para saber se há chave
+//										    }// Fim do while(i.hasNext())
+										    
+										  //Cria-se uma lista para percorrer a tag microrredes e somar todas as contribuições somatório de (potenciaDisponivel + boost)
+									  		List lista2 = agenteALBD.getChild("microrredes").getChildren();
+											Iterator i2 = lista2.iterator();
+											
+										    while(i2.hasNext()) { 
+										    	Element elemento2 = (Element) i2.next();
+										    	String nome2 = String.valueOf(elemento2.getName());
+										    	
+//												exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
+												
+										    	if (nome2!= null && nome2.length()>0 && nome2!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+										    		int referenciaDaChave = Integer.parseInt(nome2.split("_")[1].split("R")[1]); //Analisa-se a posição da chave visada
+										    		
+										    		if(referenciaDaChave>referenciaDaChaveAtuante){ //Vou analisar a carga das microrredes a jusante do trehcho onde ocorreu a falta
+										    			List lista3 = agenteALBD.getChild("microrredes").getChildren();
+														Iterator i3 = lista3.iterator();
 														
-							}// Fim do handle all responses
-							
-							protected void handleInform(ACLMessage inform) {
-//								System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
-								
-							}//Fim do handle Informr
-						}); //Fim do contract net initiator
+													    while(i3.hasNext()) { 
+													    	Element elemento3 = (Element) i3.next();
+													    	String nome3 = String.valueOf(elemento3.getName());
+													    	if (nome3!= null && nome3.length()>0 && nome3!= "nenhum"){ //Se houver microrredes no XML, então soma sua apotência
+													    		//soma a disponível com o boost da cac
+													    		//nesse zero. pegar valor de potDisponivel e da Cac
+													    		cargaTotalDisponivelMicrorrede = Double.parseDouble(elemento3.getAttributeValue("potenciaDisponivel")) + Double.parseDouble(elemento3.getAttributeValue("boost"));
+													    		//Tem-se um novo valor de cargaTotalDiponivel
+													    	}
+													    }
+										    		}//fim do if
+										    	}//fim do if
+										    }//fim do while
+										    
+										  //Cria-se uma lista para percorrer a tag CHAVES (agentes chave)
+									  		List lista = agenteALBD.getChild("chaves").getChildren(); 
+											Iterator i = lista.iterator();
+//											int cont = 0;					
+											
+											int refFechar = 0; //referência do agente chave que deve fechar assim 
+											int refMicroRedeFechar = 0; //referência do agente chave que deve fechar assim 
+											
+										    while(i.hasNext()) { 
+										    	Element elemento = (Element) i.next();
+										    	String nome = String.valueOf(elemento.getName());
+										    	
+																						
+										    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+										    		int referenciaDaChave = Integer.parseInt(nome.split("_")[1].split("R")[1]); //Analisa-se a posição da chave visada
+										    		
+										    		exibirAviso(myAgent, "A referência de "+nome+" é "+referenciaDaChave);
+										    		
+										    		if(referenciaDaChave>referenciaDaChaveAtuante){ //Se a chave analisada estiver localizada a jusante da chave atuante então
+										    			exibirAviso(myAgent, "A referência de "+nome+" é maior que a da chave atuante que é "+referenciaDaChaveAtuante);
+										    			
+										    			double cargaTrecho = Double.parseDouble(elemento.getAttributeValue("carga")); //Saber a carga só desse trecho
+										    			
+										    			//Essa parte é só pra saber a contribuição só dessa microrrede (cargaDisponviel + boost)
+										    			double cargaMicrorredeTrecho = 0;
+										    			//Quero saber a carga só da microrrede conectada a esse trecho
+												  		List lista4 = agenteALBD.getChild("microrredes").getChild(nome).getChildren(); 
+														Iterator i4 = lista4.iterator();
+
+														 while(i4.hasNext()) { 
+														    	Element elemento4 = (Element) i4.next();
+														    	String nome4 = String.valueOf(elemento4.getName());
+														    	
+//																exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
+																
+														    	if (nome4!= null && nome4.length()>0 && nome4!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+														    		cargaMicrorredeTrecho = Double.parseDouble(elemento.getAttributeValue("potenciaDisponivel")) + Double.parseDouble(elemento.getAttributeValue("boost"));
+														    		
+														    	}
+														 }
+														 
+										    			if(cargaDiponivel > cargaTotalPerdida){ //Na primeira iteração nunca será possível
+										    				refFechar = referenciaDaChave;    
+										    			}
+										    			else if(cargaDiponivel > cargaTotalPerdida - cargaTotalDisponivelMicrorrede){ //então olha-se a contribuição de microrredes
+										    				refFechar = referenciaDaChave;
+										    				refMicroRedeFechar = referenciaDaChave; //as microrredes daquele trecho em diante irão fechar
+										    			}else{ //Se mesmo com microrredes não for possível
+										    				cargaTotalPerdida = cargaTotalPerdida - cargaTrecho;
+										    				cargaTotalDisponivelMicrorrede = cargaTotalDisponivelMicrorrede - cargaMicrorredeTrecho; //Como esse trecho terá que sair a microrrede sai tbm										    			}//Ai vai pra próxima iteração
+										    		
+//										    			}// Fim do if para saber se atuou ou não
+										    		}// Fim do if para saber se referenciaDaChave>referenciaDaChaveAtuante
+										    	}// Fim do if para saber se há chave
+										    }// Fim do while(i.hasNext())
+										    }
+										   
+										     if(refFechar>0){
+											     if(refMicroRedeFechar>0){	//Se tiver microrredes, fecho microrredes e chaves
+	//										     * 		request para os acs e micro e ae(s)
+											    	 /**********************************************************************************
+													     * Protocolo FIPA Request para solicitar que as chaves a jusante da falta fechem
+													     * 
+													     *********************************************************************************/
+												  		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+												  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+													  		
+												  		//Cria-se uma lista para percorrer a tag agentesArmazenamento e ver seus elementos
+												  		List lista5 = agenteALBD.getChild("microrredes").getChildren(); 
+														Iterator i5 = lista5.iterator();
+										    				
+									    				while(i5.hasNext()) { 
+													    	Element elemento5 = (Element) i5.next();
+													    	String nome5 = String.valueOf(elemento5.getName());
+													    	
+													    	int refChaveAnalisada = Integer.parseInt(nome5.split("_")[1].split("R")[1]);
+													    	
+													    	if (nome5!= null && nome5.length()>0 && nome5!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+													    		if(refChaveAnalisada>=refFechar){
+													    			msg.addReceiver(new AID((String) nome5, AID.ISLOCALNAME)); //Adicionei a chave
+													    			
+													    			//Add agora as microrredes também
+													    			//Cria-se uma lista para percorrer a tag agentesArmazenamento e ver seus elementos
+															  		List lista6 = agenteALBD.getChild(nome5).getChildren(); //Comando o fechamento logo de todas as microrredes dessa chave se tiverem
+																	Iterator i6 = lista6.iterator();
+													    			
+																	while(i6.hasNext()) { 
+																    	Element elemento6 = (Element) i6.next();
+																    	String nome6 = String.valueOf(elemento6.getName());
+																    
+																    	if (nome6!= null && nome6.length()>0 && nome6!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+																    		msg.addReceiver(new AID((String) nome6, AID.ISLOCALNAME)); //Adicionei a(s) microrredes também
+																    	}
+																	}	
+													    		}
+													    	}//Fim do if nome diferente de nada ou nenhum 
+									    				}//Fim do segundo while
+									    				
+									    				String chaveDeEncontro = agenteALBD.getChild("outrosALs").getChild(ALParticipante).getAttributeValue("chaveDeEncontro"); 	
+									    				msg.addReceiver(new AID((String) chaveDeEncontro, AID.ISLOCALNAME)); //Adicionei a chave de encontro
+									    				 	
+													    msg.setContent("fechar");
+												  		
+												  		addBehaviour(new AchieveREInitiator(myAgent, msg) {
+															protected void handleInform(ACLMessage inform) {
+																System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+															}
+															protected void handleRefuse(ACLMessage refuse) {
+									//							System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
+									//							nResponders--;
+															}
+															protected void handleFailure(ACLMessage failure) {
+																if (failure.getSender().equals(myAgent.getAMS())) {
+																	// FAILURE notification from the JADE runtime: the receiver
+																	// does not exist
+																	System.out.println("Responder does not exist");
+																}
+																else {
+																	System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+																}
+															}
+															protected void handleAllResultNotifications(Vector notifications) {
+									//							if (notifications.size() < nResponders) {
+									//								// Some responder didn't reply within the specified timeout
+									//								System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
+									//							}
+															}
+														}); //Fim do addBehaviour do request initiator
+											    	 
+									
+											    	 
+	//										     *  else
+	//										     	*/	//request somente pro acs e ae(s)
+											     }//Se houverem microrredes para serem alertadas
+											     else{//Se não houver microrredes, fecham só as chaves mesmo
+											    	 /**********************************************************************************
+													     * Protocolo FIPA Request para solicitar somente as chaves a jusante da falta que fechem
+													     * e AEs
+													     *********************************************************************************/
+												  		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+												  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+													  		
+												  		//Cria-se uma lista para percorrer a tag agentesArmazenamento e ver seus elementos
+												  		List lista5 = agenteALBD.getChild("microrredes").getChildren(); 
+														Iterator i5 = lista5.iterator();
+										    				
+									    				while(i5.hasNext()) { 
+													    	Element elemento5 = (Element) i5.next();
+													    	String nome5 = String.valueOf(elemento5.getName());
+													    	
+													    	int refChaveAnalisada = Integer.parseInt(nome5.split("_")[1].split("R")[1]);
+													    	
+													    	if (nome5!= null && nome5.length()>0 && nome5!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+													    		if(refChaveAnalisada>=refFechar){
+													    			msg.addReceiver(new AID((String) nome5, AID.ISLOCALNAME)); //Adicionei a chave
+													    		}
+													    	}//Fim do if nome diferente de nada ou nenhum 
+									    				}//Fim do segundo while
+									    				
+									    				String chaveDeEncontro = agenteALBD.getChild("outrosALs").getChild(ALParticipante).getAttributeValue("chaveDeEncontro"); 	
+									    				msg.addReceiver(new AID((String) chaveDeEncontro, AID.ISLOCALNAME)); //Adicionei a chave de encontro
+									    				msg.setContent("fechar");
+												  		
+												  		addBehaviour(new AchieveREInitiator(myAgent, msg) {
+															protected void handleInform(ACLMessage inform) {
+																System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+															}
+															protected void handleRefuse(ACLMessage refuse) {
+									//							System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
+									//							nResponders--;
+															}
+															protected void handleFailure(ACLMessage failure) {
+																if (failure.getSender().equals(myAgent.getAMS())) {
+																	// FAILURE notification from the JADE runtime: the receiver
+																	// does not exist
+																	System.out.println("Responder does not exist");
+																}
+																else {
+																	System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+																}
+															}
+															protected void handleAllResultNotifications(Vector notifications) {
+									//							if (notifications.size() < nResponders) {
+									//								// Some responder didn't reply within the specified timeout
+									//								System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
+									//							}
+															}
+														}); //Fim do addBehaviour do request initiator
+											     }
+										     }//Se houverem chaves para serem fechadas
+										}
+									}//Fim do handle Informr
+								}); //Fim do contract net initiator
+					    	}// Fim do time elapse do waker behaviour
+					    });	//Fim do waker behaviour
+					   
 
 					} //Fim do if(cont>referenciaDaChaveAtuante)
 				    else{ //se não tem chaves a jusante, mas ver se não tem pelo menos microrrede no mesmo trecho.Chegando aqui nada pode ser feito para recomposição. É um alimentador que possui 1 trecho somente
@@ -514,11 +866,29 @@ public class agenteAlimentador extends Agent {
 				}// Fim do if(conteudo.equals("curto"))
 				else{ //Se não, é porque não houve curto e só está sendo repassado o valor de carga tanto de agentes chave como APCs para atualização
 					
+					String agenteSender = subscription.getSender().getLocalName();
+					String diferenciar = agenteSender.substring(0, 2);
+					exibirAviso(myAgent, "Saber se é agente chave ou microrrede: "+diferenciar);
 					
-					//Vou atualizar então esse valor no XML
-					String chave = subscription.getSender().getLocalName();
-					exibirAviso(myAgent, "Fui informado de um valor de carga pelo agente chave: "+chave);
-					agenteALBD.getChild("chaves").getChild(subscription.getSender().getLocalName()).setAttribute("carga",subscription.getContent());
+					if(diferenciar.equalsIgnoreCase("AL")){
+						//Vou atualizar então esse valor no XML
+						String chave = subscription.getSender().getLocalName();
+						exibirAviso(myAgent, "Fui informado de um valor de carga pelo agente chave: "+chave);
+						agenteALBD.getChild("chaves").getChild(subscription.getSender().getLocalName()).setAttribute("carga",subscription.getContent());
+					}else{//SE não foi chave então é microrrede
+						String apc = subscription.getSender().getLocalName();
+						exibirAviso(myAgent, "Fui informado de um valor de carga pelo agente ponto de conexão: "+apc);
+						
+						String nomeAPC = subscription.getSender().getLocalName(); 
+						//A mensagem do apc terá que ser no formato:  "agenteChaveOQualEsseAPCEstáNoMesmoTrecho/potenciaDisponivel/PotenciaBoost"
+						String agenteChave = subscription.getContent().split("/")[0]; //agente chave o qual esse microrrede está conectada na mesmo trecho
+						String potenciaMicrorrede = subscription.getContent().split("/")[1];  //deltaP da microrrede
+						String boost = subscription.getContent().split("/")[1]; //Potencia da Cac que ainda pode ser dado
+						
+						agenteALBD.getChild("microrredes").getChild(agenteChave).getChild(nomeAPC).setAttribute("potenciaDisponivel",potenciaMicrorrede);
+						agenteALBD.getChild("microrredes").getChild(agenteChave).getChild(nomeAPC).setAttribute("potenciaBoost",boost);
+					}
+					
 				}
 				
 				
@@ -652,7 +1022,7 @@ public class agenteAlimentador extends Agent {
 ////					System.out.println("Agent "+getLocalName()+": Action successfully performed");
 					ACLMessage inform = accept.createReply();
 					inform.setPerformative(ACLMessage.INFORM);
-//					
+					inform.setContent(cfp.getContent());
 //					//Antes eu dou uma atualizada no XML
 //					agenteAABD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
 //					agenteAABD.getChild("comando").getChild("status").setText("0"); //seta no XML o modo de tensão pois no matlab tem um NOT que enviará 1 para a fonte de tensão

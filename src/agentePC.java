@@ -36,9 +36,11 @@ import java.util.Vector;
 
 
 
+
 //Comportamentos cíclicos
 import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WakerBehaviour;
+
 
 
 
@@ -52,6 +54,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder; //This package support classes for building JDOM documents and content using SAX parsers. 
 //import org.jdom2.Attribute;
+
 
 
 
@@ -102,6 +105,8 @@ public class agentePC extends Agent { /**
 		
 		final MessageTemplate filtroIlha = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 		
+		final MessageTemplate filtroFechar = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+		  		MessageTemplate.MatchContent("fechar")); //filtro do al mandando ela fechar
 //		System.out.println(".:: Agente PCC APCC1 iniciado com sucesso! ::.\n");
 //		System.out.println("Todas as minhas informações: \n" +getAID());
 //		System.out.println(">> Meu nome local é " + getLocalName()); // Informações completas
@@ -343,8 +348,51 @@ public class agentePC extends Agent { /**
 								PotenciaGeracaoTotal = 0;
 								PotenciaDemandaTotal = 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
 												    
-							    //Obs.: Por enquanto vou colocar valores aleatórios para cacular o balanço de potência na microrrede
-							    // Mas ai tenho que já ter uma base da potência da microrrede, das cargas...
+								/********************************************************************************
+								 * FIPA Subscribe Initiator para enviar valores de potência disponível ao AL o qual a microrrede estiver conectada
+								 ********************************************************************************/	
+								ACLMessage msgEnviarPot = new ACLMessage(ACLMessage.SUBSCRIBE); // Campo da mensagem SUBSCRIBE
+								msgEnviarPot.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+								
+								String AL = String.valueOf(agenteApcBD.getChildText("agenteAlimentador"));
+								msgEnviarPot.addReceiver(new AID((String) AL, AID.ISLOCALNAME));
+								
+								String AC = agenteApcBD.getChildText("agenteChave");
+								
+//								String boost = agenteApcBD.getChild("medidasAtuais").get <--para esse tenho que fazer um while, ver se tem fonte controlada e pegar o valor de capacidade dela. Esse valor tem que ser atualizado por essa fonte
+								String boost = "3.62"; //carga nominal da Cac
+								
+								if(deltaP>0){
+									double correnteDeltaP = deltaP/13800;
+									msgEnviarPot.setContent(AC.concat("/").concat(String.valueOf(deltaP)).concat("/").concat(boost));
+								}else{ //Se deltaP negativo, não posso ajudar em nada
+									double correnteDeltaP = 0;
+									msgEnviarPot.setContent(AC.concat("/").concat("0").concat("/").concat("0"));
+								}
+								
+							    addBehaviour(new SubscriptionInitiator(myAgent,msgEnviarPot){
+							    	
+									private static final long serialVersionUID = 1L; //Posto automaticamente
+			//						double PotenciaGeracaoTotal, valorPotGerRecebido = 0; //Inicialização da potência gerada por gerações intermitentes (
+			//						double PotenciaDemandaTotal, valorPotDemRecebido = 0; //Inicialização da potência demandada pelas cargas
+			//					    double deltaP = 0;  //Inicialização do balanço de potência
+								    
+									/* No handleAgree eu vou coletando os valores de todas as gerações e vou armazenando na variável PotenciaGeracaoI
+									 * (non-Javadoc)
+									 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
+									 */
+									protected void handleAgree(ACLMessage agree){
+										
+							    	}//Fim do handleAgree do Subscribe
+							
+									protected void handleRefuse(ACLMessage refuse) { //Se recusar
+										
+									}// Fim do handleRefuse do Subscribe
+									protected void handleFailure(ACLMessage failure) { //Se erro
+										
+									}// Fim do handleFailure do Subscribe
+							    }); // Fim do comportamento FIPA Subscribe -> addBehaviour(new SubscriptionInitiator(myAgent,msgEnviarPot){ para o AL
+							    
 				
 								/**
 								 * Um valor positivo de deltaP diz que tá sobrando energia. Um valor negativo, diz que tá com déficit, ou seja, 
@@ -1013,7 +1061,7 @@ public class agentePC extends Agent { /**
 				
 				if(request.getContent().equals("abra")){
 					//Antes eu dou uma atualizada no XML
-					agenteApcBD.getChild("comando").getChild("estadoChave").setText("0"); //seta o XML o disjuntor fechando
+					agenteApcBD.getChild("comando").getChild("estadoChave").setText("0"); //seta o XML o disjuntor abrindo
 					
 					resposta.setContent("Ok");
 					resposta.setPerformative(ACLMessage.AGREE);
@@ -1021,6 +1069,45 @@ public class agentePC extends Agent { /**
 				
 				return resposta;
 			}
+		} );//Fim do request responder 
+		
+		/*************************************************************************
+		 * FIPA Request Responder para responder a solicitação do AL para fechar
+		 *********************************************************************				resposta.setContent("Ok");*****/
+		addBehaviour(new AchieveREResponder(this, filtroFechar) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+//				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				if (checkAction()) {
+//					// We agree to perform the action. Note that in the FIPA-Request
+//					// protocol the AGREE message is optional. Return null if you
+//					// don't want to send it.
+//					System.out.println("Agent "+getLocalName()+": Agree");
+//					ACLMessage agree = request.createReply();
+//					agree.setPerformative(ACLMessage.AGREE);
+//					return agree;
+//				}
+//				else {
+//					// We refuse to perform the action
+//					System.out.println("Agent "+getLocalName()+": Refuse");
+//					throw new RefuseException("check-failed");
+//				}
+				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+				
+				ACLMessage resposta = request.createReply();
+				resposta.setPerformative(ACLMessage.AGREE);
+				resposta.setContent("ok");
+				
+				//Antes seto no XML que o agente chave irá comandar a abertura da sua chave quando for responder ao inform de monitoramento do matlab
+				agenteApcBD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
+				agenteApcBD.getChild("medidasAtuais").getChild("estadoChave").setText("1");
+				
+				return resposta;
+			}// Fim do protected ACLMessage prepareResponse
 		} );//Fim do request responder 
 	
 	} // fim do public void setup
