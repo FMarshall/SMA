@@ -7,16 +7,21 @@
 		
 		<chaves> <!-- Chaves normais -->
 			<AL3_R1 atuacao = "nao" estado = "fechada" carga = "1" sentido = "+" trecho = "1" capacidade="215"/>   
+			<AL3_R2 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "2" capacidade="215" />
 		</chaves>
 		
 		<microrredes>
       <AL3_R1>
           <nenhum  potenciaDisponivel="0" boost="0"/>
       </AL3_R1>  
+      
+      <AL3_R2>
+          <nenhum  potenciaDisponivel="0" boost="0"/>
+      </AL3_R2>  
     </microrredes>
 		
       <outrosALs>
-        <AL2 chaveDeEncontro="AE_23" chaveFronteira = "AL3_R1" />
+        <AL2 chaveDeEncontro="AE_23" chaveFronteira = "AL3_R2" />   <!-- minha propria chave-->
       </outrosALs>
 
 		  <limFonte>500000</limFonte>

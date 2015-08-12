@@ -8,8 +8,7 @@
 		<chaves> <!-- Chaves normais -->
 			<AL2_R1 atuacao = "nao" estado = "fechada" carga = "0" sentido = "+" trecho = "4" capacidade="215" />  
 			<AL2_R2 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "3" capacidade="215" />
-			<AL2_R3 atuacao = "nao" estado = "fechada"  carga = "0" sentido = "+" trecho = "2" capacidade="215" />
-		</chaves>
+     </chaves>
 		
     <microrredes>
       <AL2_R1>
@@ -19,15 +18,11 @@
       <AL2_R2>
           <APC1  potenciaDisponivel="0"  boost="0" />
       </AL2_R2>
-      
-      <AL2_R3>
-          <nenhum potenciaDisponivel="0" boost="0"  />
-      </AL2_R3>  
     </microrredes>
     
      <outrosALs>
-        <AL1 chaveDeEncontro="AE_12"  chaveFronteira = "AL2_R2"/>
-        <AL3 chaveDeEncontro="AE_23"  chaveFronteira = "AL2_R3"/>
+        <AL1 chaveDeEncontro="AE_12"  chaveFronteira = "AL2_R2"/>  <!-- minha propria chave-->
+        <AL3 chaveDeEncontro="AE_23"  chaveFronteira = "AL2_R2"/>  <!-- minha propria chave-->
       </outrosALs>
 		
     <limFonte>500000</limFonte> <!-- Capacidade do AL1 -->		

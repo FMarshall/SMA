@@ -27,7 +27,7 @@
     </microrredes>
     
      <outrosALs>
-        <AL2 chaveDeEncontro="AE_12"  chaveFronteira = "AL1_R3" />  
+        <AL2 chaveDeEncontro="AE_12"  chaveFronteira = "AL1_R3" />  <!-- minha propria chave-->
       </outrosALs> 
 
       
