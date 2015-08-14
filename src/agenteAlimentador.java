@@ -939,7 +939,10 @@ public class agenteAlimentador extends Agent {
 		addBehaviour(new ContractNetResponder(this, filtroContractNet) {
 			
 			private static final long serialVersionUID = 1L;
-
+			
+			ArrayList nomesAPCs = new ArrayList();
+//			int contUREDE = 0;  //saber se será preciso acionar microrrede para dar um boost
+			
 			protected ACLMessage handleCfp(ACLMessage cfp) throws NotUnderstoodException, RefuseException {
 				/* 1 Saber carga própria (nesse caso sempre será a da primeira chave)
 				 * 2 Ver limite da fonte limFonte >= Ipropria + Imultua?
@@ -960,41 +963,93 @@ public class agenteAlimentador extends Agent {
 				//Analisar se a fonte é capaz de suprir tudo 
 				double limFonte = Double.parseDouble(agenteALBD.getChildText("limFonte"));
 				
-				if(limFonte >= cargaPropria + cargaSolicitada){ //A fonte é capaz de suprir tudo?
+				if(limFonte >= cargaPropria + cargaSolicitada){ //A fonte é capaz de suprir tudo (sua carga mais a solicitada)?
 					exibirAviso(myAgent, "A minha fonte de valor >"+limFonte+" pode suprir a carga solicitada de >"+cargaSolicitada);
 					cargaDisponivel = cargaSolicitada; //Se a fonte puder suprir tudo, então a carga disponível é toda a carga solicitada
 					
-					//Verificar agora se não há sobrecargas em cada trecho do AL solicitado
+					
+					//Uma vez que a fonte pode suprir , é Verificar agora se não há sobrecargas em cada trecho do AL solicitado
 					List lista = agenteALBD.getChild("chaves").getChildren(); 
 					Iterator i = lista.iterator();
 					
 					int cont = 0;  //Só pra ver se o while analisa os trechos na sequencia certa do trecho mais a jusante R1 para o a montate..
+					
 				    while(i.hasNext()) { 
 				    	Element elemento = (Element) i.next();
-				    	String nome = String.valueOf(elemento.getName());
+				    	String nome = String.valueOf(elemento.getName()); //Nome da chave
 				    	
 				    	cont = cont+1;
 				    	exibirAviso(myAgent, "Analisando sobrecarga no trecho da chave: "+nome+". O valor de cont é: "+cont);
 				    	
 				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML
-				    		double cargaDoTrecho = Double.parseDouble(elemento.getAttributeValue("carga"));
-				    		double capacidadeDoCondutor = Double.parseDouble(elemento.getAttributeValue("capacidade"));
+					    	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				    		if(cargaSolicitada != cargaDisponivel){ //Se a carga solicitada for diferente da disponível é porque já houve sobrecarga no trecho a montante (iteração anterior) <<<<<<<<
+					    		//Se por acaso no trecho anterior houve sobrecarga, vejo se tem microrrede para boost nesse trecho atual para compensar o que o anterior não pode dar
+					    		double IdisponivelDaMicrorrede = 0; //Vou analisar se tem microrredes no trecho para poder darem um boost. Se não tiver, então IdisponveilMicrorrede continuará zero
+					    		
+					    		List lista2 = agenteALBD.getChild("microrredes").getChild(nome).getChildren();
+					    		Iterator i2 = lista2.iterator();
+					    		
+					    		while(i.hasNext()) {//While só pra saber o boost de todas as microrredes conectadas a esse trecho tendo o agente chave como responsável 
+							    	Element elemento2 = (Element) i2.next();
+							    	String nome2 = String.valueOf(elemento2.getName()); //Nome da microrrede
+							    	
+							    	if (nome2!= null && nome2.length()>0 && nome2!= "nenhum"){ //Se houver agentes apc no XML
+							    		
+							    		IdisponivelDaMicrorrede = IdisponivelDaMicrorrede + Double.parseDouble(elemento2.getAttributeValue("boost"));
+							    		//colocar um array pegando o nome dessa microrrede ################################################################################################
+							    		nomesAPCs.add(nome2); //add aqui o nome da microrrede
+//							    		contUREDE = contUREDE+1;
+							    		
+							    	}//fim do if para saber se nome2 diferente de nenhum
+					    		}//Fim do while para percorrer as microrredes
+					    		
+					    		double cargaDoTrecho = Double.parseDouble(elemento.getAttributeValue("carga"));
+					    		double capacidadeDoCondutor = Double.parseDouble(elemento.getAttributeValue("capacidade"));
+					    		
+					    		exibirAviso(myAgent, "A carga do trecho da chave >"+nome+" é >"+cargaDoTrecho+". A capacidade de seu condutor é > "+capacidadeDoCondutor);
+					    		
+					    		if(capacidadeDoCondutor >= cargaDoTrecho + cargaDisponivel + IdisponivelDaMicrorrede){
+					    			cargaDisponivel = cargaDisponivel + IdisponivelDaMicrorrede;
+					    			//E não altero o valor de carga disponível
+					    			exibirAviso(myAgent, "Não há sobrecarga no trecho de "+nome+" com a contribuição de microrrede");
+					    		}
+					    		else if(capacidadeDoCondutor >= cargaDoTrecho + cargaDisponivel){
+					    			//Não altero o valor de carga disponível
+					    		}
+					    		else{
+//					    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
+					    			cargaDisponivel = (capacidadeDoCondutor - cargaDoTrecho);
+					    			exibirAviso(myAgent, "Há sobrecarga no trecho de "+nome+". O valor de carga disponível passa a ser: "+cargaDisponivel);
+					    		}
+					    	
+				    		}// //Fim do if para saber se já houve sobrecarga
 				    		
-				    		exibirAviso(myAgent, "A carga do trecho da chave >"+nome+" é >"+cargaDoTrecho+". A capacidade de seu condutor é > "+capacidadeDoCondutor);
-				    		
-				    		if(capacidadeDoCondutor >= cargaDoTrecho + cargaDisponivel){
-				    			exibirAviso(myAgent, "Não há sobrecarga no trecho de "+nome);
-				    			//E não altero o valor de carga disponível
-				    		}
-				    		else{
-//				    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
-				    			cargaDisponivel = (capacidadeDoCondutor - cargaDoTrecho);
-				    			exibirAviso(myAgent, "Há sobrecarga no trecho de "+nome+". O valor de carga disponível passa a ser: "+cargaDisponivel);
-				    		}
-				    		
-				    	}// Fim do if (nome!= null && nome.length()>0 && nome!= "nenhum")
+				    	}//Fim do if para saber se nome diferente de "nenhum"  <<<<<<<<<<<<<<<<<<<<<,
+				    	
+				    	else{//senão tá diferente do valor de carga perdido e o disponível, então é porque não houve sobrecarga. Vou continuar a análise de sobrecarga normal <<<<<<<<<<<<<<<
+				    		if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML
+					    		double cargaDoTrecho = Double.parseDouble(elemento.getAttributeValue("carga"));
+					    		double capacidadeDoCondutor = Double.parseDouble(elemento.getAttributeValue("capacidade"));
+					    		
+					    		exibirAviso(myAgent, "A carga do trecho da chave >"+nome+" é >"+cargaDoTrecho+". A capacidade de seu condutor é > "+capacidadeDoCondutor);
+					    		
+					    		if(capacidadeDoCondutor >= cargaDoTrecho + cargaDisponivel){
+					    			exibirAviso(myAgent, "Não há sobrecarga no trecho de "+nome);
+					    			//E não altero o valor de carga disponível
+					    		}
+					    		else{
+//					    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
+					    			cargaDisponivel = (capacidadeDoCondutor - cargaDoTrecho);
+					    			exibirAviso(myAgent, "Há sobrecarga no trecho de "+nome+". O valor de carga disponível passa a ser: "+cargaDisponivel);
+					    		}
+					    		
+					    	}// Fim do if (nome!= null && nome.length()>0 && nome!= "nenhum")
+				    	
+				    	}//Fim do else pra saber se houve sobrecarga ou não <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<</////////////////////////////////////////
 				    }// Fim do while
 					
+				   
 //				    ACLMessage propose = cfp.createReply();
 //					propose.setPerformative(ACLMessage.PROPOSE);
 					propose.setContent(String.valueOf(cargaDisponivel));
@@ -1006,7 +1061,7 @@ public class agenteAlimentador extends Agent {
 //					cargaSolicitada = (limFonte - cargaPropria)*0.9; //A carga solicitada passa a ser só o que o AL é capaz de suprir
 					cargaSolicitada = (limFonte - cargaPropria); //A carga solicitada passa a ser só o que o AL é capaz de suprir
 					
-					//Verificar agora se não há sobrecargas em cada trecho com o valor de carga solicitada recalculado
+					//Verificar agora se não há sobrecargas em cada trecho com o valor de carga disponível recalculado
 					List lista = agenteALBD.getChild("chaves").getChildren(); 
 					Iterator i = lista.iterator();
 					
@@ -1045,22 +1100,58 @@ public class agenteAlimentador extends Agent {
 			}//Fim do handle cfp
 
 			protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose,ACLMessage accept) throws FailureException {
-////				System.out.println("Agent "+getLocalName()+": Proposal accepted");
-////				if (performAction()) {
-////					System.out.println("Agent "+getLocalName()+": Action successfully performed");
+					
+					int quantUREDE = nomesAPCs.size();
+//					if(contUREDE>0){ //preciso solicitar microrrede(s) que dêem um boost acionando geração controlada
+					if(quantUREDE>0){	
+						
+						/**********************************************************************************
+					     * Protocolo FIPA Request Initiator para solicitar microrrede acionem suas gerações controladas
+					     * 
+					     *********************************************************************************/
+				  		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+				  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+					  		
+				  		for (int i=0; i<quantUREDE; i++) {
+				  	      msg.addReceiver(new AID((String) nomesAPCs.get(i), AID.ISLOCALNAME));
+				  		}
+				  		
+					    msg.setContent("boost");
+				  		
+				  		addBehaviour(new AchieveREInitiator(myAgent, msg) {
+							protected void handleInform(ACLMessage inform) {
+//								System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+							}
+							protected void handleRefuse(ACLMessage refuse) {
+	//							System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
+	//							nResponders--;
+							}
+							protected void handleFailure(ACLMessage failure) {
+								if (failure.getSender().equals(myAgent.getAMS())) {
+									// FAILURE notification from the JADE runtime: the receiver
+									// does not exist
+//									System.out.println("Responder does not exist");
+								}
+								else {
+//									System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+								}
+							}
+							protected void handleAllResultNotifications(Vector notifications) {
+	//							if (notifications.size() < nResponders) {
+	//								// Some responder didn't reply within the specified timeout
+	//								System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
+	//							}
+							}
+						}); //Fim do addBehaviour do request initiator
+											
+					}//Fim do if(quantUREDES>0)
+					
+					//Aqui respondo normalmente ao AL initiator
 					ACLMessage inform = accept.createReply();
 					inform.setPerformative(ACLMessage.INFORM);
 					inform.setContent(accept.getContent());
-//					//Antes eu dou uma atualizada no XML
-//					agenteAABD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
-//					agenteAABD.getChild("comando").getChild("status").setText("0"); //seta no XML o modo de tensão pois no matlab tem um NOT que enviará 1 para a fonte de tensão
-//					
+			
 					return inform;
-////				}
-////				else {
-////					System.out.println("Agent "+getLocalName()+": Action execution failed");
-////					throw new FailureException("unexpected-error");
-////				}	
 			}
 
 			protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
