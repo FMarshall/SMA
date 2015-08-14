@@ -106,7 +106,7 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 				//if(msg_curto!=null && msg_curto.getContent()=="curto"){
 				//if(msg_curto!=null && conteudo=="curto"){
 				if(msg!=null){	
-					exibirMensagem(msg);
+//					exibirMensagem(msg);
 					
 //					if(msg.getContent().equals("0")) {
 //						System.out.println("Chave está aberta!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -117,13 +117,13 @@ public class agenteGeracao extends Agent { // Classe "agenteGeracao" que por sua
 //					}
 					
 					String conteudo = msg.getContent();  //Pego o conteudo da mensagem
-					exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+conteudo);
+//					exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+conteudo);
 					
 					String potencia = conteudo.split("/")[0]; /*A mensagem é no formato:  "potencia gerada/estado da chave". Foi aplicado o método split para quebrar o "conteudo" em 
 					array sendo a separação definida pelo caracter "/". Da separação eu peguei a posição 0 da array que corresponde a potencia gerada pelo dispositivo monitorado.*/
 //					System.out.println("A referencia da carga é: "+refCarga); //Só pra testar se tava dando certo
 					String estadoChave = conteudo.split("/")[1];
-					exibirAviso(myAgent, "O estado da minha chave é: "+estadoChave);
+//					exibirAviso(myAgent, "O estado da minha chave é: "+estadoChave);
 					
 					agenteAGBD.getChild("pontos_medida").getChild("potencia").setText(potencia); /*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
 					/* Essa parte é opcional. Creio que não seja necessário responder ao matlab que deu certo.

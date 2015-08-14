@@ -112,7 +112,7 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 				//if(msg_curto!=null && msg_curto.getContent()=="curto"){
 				//if(msg_curto!=null && conteudo=="curto"){
 				if(msg!=null){	
-					exibirMensagem(msg);
+//					exibirMensagem(msg);
 					
 					/*
 					 * Parte de medição e aquisição de dados e armazenamento no XML
@@ -120,16 +120,21 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 					String conteudo = msg.getContent();  //Pego o conteudo da mensagem
 					String estadoChave = conteudo; //A mensagem contêm somente o estado da chave da geração controlada
 				
-					exibirAviso(myAgent, "O estado da minha chave é: "+estadoChave);
+//					exibirAviso(myAgent, "O estado da minha chave é: "+estadoChave);
 					
-					agenteGCBD.getChild("medidasAtuais").getChild("estadoChave").setText(estadoChave); /*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
+					agenteGCBD.getChild("medidasAtuais").getChild("estadoChave").setText(estadoChave); /*Seta no XML o valor do estado da chave da geração controlada*/
 					
 					/*
 					 * Parte de consulta ao XML e comando
 					 * O camando será enviado como resposta ao inform da medição. São aproveitadas 2 das variáveis anteriores 
 					 */
+					String potencia = "0";
 					estadoChave = agenteGCBD.getChild("comando").getChild("estadoChave").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
-					String potencia = agenteGCBD.getChild("comando").getChildText("potNominal"); //consulta no XML a potência de referência que terá que ser gerada
+					if(estadoChave.equalsIgnoreCase("0")){
+						potencia = "0"; //A geração controlada não irá gerar nada
+					}else if(estadoChave.equalsIgnoreCase("1")){
+						potencia = agenteGCBD.getChild("comando").getChildText("potNominal"); //consulta no XML a potência de referência que terá que ser gerada
+					}
 					
 					ACLMessage resposta = msg.createReply();
 					resposta.setContent(estadoChave+"/"+potencia); //A mensagem será no formato "estadoChave/potencia"
@@ -147,7 +152,7 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 
 			protected ACLMessage handleCfp(ACLMessage cfp) throws NotUnderstoodException, RefuseException {
 //				System.out.println("Agent "+getLocalName()+": CFP received from "+cfp.getSender().getName()+". Action is "+cfp.getContent());
-				exibirMensagem(cfp);
+//				exibirMensagem(cfp);
 				
 				
 				// We provide a proposal
@@ -155,7 +160,7 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 //				double deltaP = Double.parseDouble(cfp.getContent());
 //				double potenciaNominal = Double.parseDouble(agenteGCBD.getChild("potNominal").getText());
 				
-				exibirAviso(myAgent, "Estou propondo: "+agenteGCBD.getChild("comando").getChild("potNominal").getText());
+//				exibirAviso(myAgent, "Estou propondo: "+agenteGCBD.getChild("comando").getChild("potNominal").getText());
 				
 				ACLMessage propose = cfp.createReply();
 				propose.setPerformative(ACLMessage.PROPOSE);

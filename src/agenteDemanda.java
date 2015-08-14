@@ -147,7 +147,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 //					    		exibirAviso(myAgent, "Solicitando corte de carga à " +nome);
 					    		
 					    		String comando = String.valueOf(elemento.getAttributeValue("comando"));
-					    		exibirAviso(myAgent,"O comando de "+nome+" é "+comando);
+//					    		exibirAviso(myAgent,"O comando de "+nome+" é "+comando);
 					    		
 					    		if(comando.equals("0")){
 					    			if(conteudoDaResposta == null){
@@ -155,7 +155,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 					    				conteudoDaResposta = "0/";
 					    			}else{
 						    			conteudoDaResposta = conteudoDaResposta.concat("0/");
-						    			exibirAviso(myAgent,conteudoDaResposta);
+//						    			exibirAviso(myAgent,conteudoDaResposta);
 					    			}	
 					    		}else if(comando.equals("1")){
 					    			if(conteudoDaResposta == null){
@@ -163,9 +163,9 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 					    				conteudoDaResposta = "1/";
 					    			}else{
 						    			conteudoDaResposta = conteudoDaResposta.concat("1/");
-					    				exibirAviso(myAgent,conteudoDaResposta);
+//					    				exibirAviso(myAgent,conteudoDaResposta);
 					    			}	
-					    			exibirAviso(myAgent,conteudoDaResposta);
+//					    			exibirAviso(myAgent,conteudoDaResposta);
 					    		}
 					    	}
 					    }	
@@ -177,7 +177,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 					
 					
 					resposta.setContent(conteudoDaResposta); //A mensagem será no formato "estadoChave/modoAtuacao/Pbat"
-					exibirAviso(myAgent, "O conteúdo final ficou: "+conteudoDaResposta);
+//					exibirAviso(myAgent, "O conteúdo final ficou: "+conteudoDaResposta);
 					send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
 			
 					/*Seta no XML o valor da potência gerada pelo sistema de geração intermitente*/
@@ -226,7 +226,7 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 //								System.out.println("Entrou no if!!!!!");  //Só pra testar
 			    		
 			    		valorCarga = Double.parseDouble(elemento.getAttributeValue("demanda"));
-			    		exibirAviso(myAgent, "O valor da carga de " +nome+" é " +valorCarga);
+//			    		exibirAviso(myAgent, "O valor da carga de " +nome+" é " +valorCarga);
 			    		potenciaTotalCargas = potenciaTotalCargas + valorCarga;
 			    		valorCarga = 0;
 			    	}
@@ -252,28 +252,12 @@ public class agenteDemanda extends Agent { // Classe "agenteGeracao" que por sua
 			private static final long serialVersionUID = 1L;
 
 			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
-//				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
-//				if (checkAction()) {
-//					// We agree to perform the action. Note that in the FIPA-Request
-//					// protocol the AGREE message is optional. Return null if you
-//					// don't want to send it.
-//					System.out.println("Agent "+getLocalName()+": Agree");
-//					ACLMessage agree = request.createReply();
-//					agree.setPerformative(ACLMessage.AGREE);
-//					return agree;
-//				}
-//				else {
-//					// We refuse to perform the action
-//					System.out.println("Agent "+getLocalName()+": Refuse");
-//					throw new RefuseException("check-failed");
-//				}
-//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
-				
+
 				exibirMensagem(request);
 				ACLMessage resposta = request.createReply();
 				
 				if(request.getContent().equals("corteDeCarga")){
-					exibirAviso(myAgent, "Estou cortando as cargas não prioritárias");
+//					exibirAviso(myAgent, "Estou cortando as cargas não prioritárias");
 					
 					List lista = agenteADBD.getChild("cargas").getChildren(); 
 			  		

@@ -135,7 +135,7 @@ public class agentePC extends Agent { /**
 				//if(msg_curto!=null && msg_curto.getContent()=="curto"){
 				//if(msg_curto!=null && conteudo=="curto"){
 				if(msg!=null){	
-					exibirMensagem(msg);
+//					exibirMensagem(msg);
 					String cr = msg.getContent();  //Bem aqui vou deixar de pegar o que tem na mensagem e o conteudo passará a ser o lido no XML
 
 //					String cr = String.valueOf(agenteApcBD.getChild("medidasAtuais").getChild("estadoChave").getText()); //Consulta no XML o valor do disjuntor a jusante do inversor
@@ -180,7 +180,7 @@ public class agentePC extends Agent { /**
 							
 					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes de armazenamento no XML, então add ele como remetente
 	//									System.out.println("Entrou no if!!!!!");  //Só pra testar
-					    		exibirAviso(myAgent, "Solicitando a "+nome+"que atue como fonte de tensão.");
+//					    		exibirAviso(myAgent, "Solicitando a "+nome+"que atue como fonte de tensão.");
 					    		msg1.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 					    	}
 					    }		
@@ -189,7 +189,7 @@ public class agentePC extends Agent { /**
 				  		
 				  		addBehaviour(new AchieveREInitiator(myAgent, msg1) {
 							protected void handleInform(ACLMessage inform) {
-								System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+//								System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
 							}
 							protected void handleRefuse(ACLMessage refuse) {
 	//							System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
@@ -199,10 +199,10 @@ public class agentePC extends Agent { /**
 								if (failure.getSender().equals(myAgent.getAMS())) {
 									// FAILURE notification from the JADE runtime: the receiver
 									// does not exist
-									System.out.println("Responder does not exist");
+//									System.out.println("Responder does not exist");
 								}
 								else {
-									System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+//									System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
 								}
 							}
 							protected void handleAllResultNotifications(Vector notifications) {
@@ -236,7 +236,7 @@ public class agentePC extends Agent { /**
 					    	
 					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 	//									System.out.println("Entrou no if!!!!!");  //Só pra testar
-					    		exibirAviso(myAgent, "Solicitando valor de potencia gerada a " +nome);
+//					    		exibirAviso(myAgent, "Solicitando valor de potencia gerada a " +nome);
 					    		msgColetarPot.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 					    	}
 					    }
@@ -253,10 +253,10 @@ public class agentePC extends Agent { /**
 							 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
 							 */
 							protected void handleAgree(ACLMessage agree){
-								exibirMensagem(agree);
+								//exibirMensagem(agree);
 								double valorRecebido = Double.parseDouble(agree.getContent());
 								valorPotGerRecebido = Double.parseDouble(agree.getContent());
-								exibirAviso(myAgent, "Recebi um valor de "+valorPotGerRecebido+" de "+agree.getSender());
+//								exibirAviso(myAgent, "Recebi um valor de "+valorPotGerRecebido+" de "+agree.getSender());
 								PotenciaGeracaoTotal = PotenciaGeracaoTotal + valorPotGerRecebido; 
 								valorPotGerRecebido = 0;
 								
@@ -295,7 +295,7 @@ public class agentePC extends Agent { /**
 							
 					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 	//									System.out.println("Entrou no if!!!!!");  //Só pra testar
-					    		exibirAviso(myAgent, "Solicitando valor de carga a " +nome);
+//					    		exibirAviso(myAgent, "Solicitando valor de carga a " +nome);
 					    		msgColetarPotCargas.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 					    	}
 					    }
@@ -311,10 +311,10 @@ public class agentePC extends Agent { /**
 							 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
 							 */
 							protected void handleAgree(ACLMessage agree){
-								exibirMensagem(agree);
+//								exibirMensagem(agree);
 	//							double valorRecebido = Double.parseDouble(agree.getContent());
 								valorPotDemRecebido = Double.parseDouble(agree.getContent());
-								exibirAviso(myAgent, "Recebi um valor de "+valorPotDemRecebido+" de "+agree.getSender());
+//								exibirAviso(myAgent, "Recebi um valor de "+valorPotDemRecebido+" de "+agree.getSender());
 								PotenciaDemandaTotal = PotenciaDemandaTotal + valorPotDemRecebido; 
 								valorPotDemRecebido = 0;
 	//							exibirAviso(myAgent, "O valor da potencia gerada é: "+PotenciaGeracaoI);
@@ -339,7 +339,7 @@ public class agentePC extends Agent { /**
 	//				     Add the WakerBehaviour (wakeup-time 1 sec)
 					    addBehaviour(new WakerBehaviour(myAgent, 1000) {
 					    	protected void handleElapsedTimeout() {
-					    		exibirAviso(myAgent, "Agent "+myAgent.getLocalName()+": It's wakeup-time. Bye...");
+//					    		exibirAviso(myAgent, "Agent "+myAgent.getLocalName()+": It's wakeup-time. Bye...");
 							    exibirAviso(myAgent, "A potência gerada total é: "+PotenciaGeracaoTotal);
 							    exibirAviso(myAgent, "A potência demandada total é: "+PotenciaDemandaTotal);
 							    deltaP = PotenciaGeracaoTotal - PotenciaDemandaTotal;
@@ -362,13 +362,17 @@ public class agentePC extends Agent { /**
 //								String boost = agenteApcBD.getChild("medidasAtuais").get <--para esse tenho que fazer um while, ver se tem fonte controlada e pegar o valor de capacidade dela. Esse valor tem que ser atualizado por essa fonte
 								String boost = "3.62"; //carga nominal da Cac
 								
-								if(deltaP>0){
-									double correnteDeltaP = deltaP/13800;
-									msgEnviarPot.setContent(AC.concat("/").concat(String.valueOf(deltaP)).concat("/").concat(boost));
-								}else{ //Se deltaP negativo, não posso ajudar em nada
-									double correnteDeltaP = 0;
-									msgEnviarPot.setContent(AC.concat("/").concat("0").concat("/").concat("0"));
-								}
+								/*
+								 * Se deltaP positivo, então a uRede está injetando, logo quando AL initiator for solicitar tem-se IPerdida = Imedida + IuRede 
+								 * Se deltaP negativo, então a uRede está consumindo, logo quando AL initiator for solicitar tem-se IPerdida = Imedida - IuRede 
+								 */
+//								if(deltaP>0){
+									double correnteDeltaP = (deltaP/380)*(380/13800);
+									msgEnviarPot.setContent(AC.concat("/").concat(String.valueOf(correnteDeltaP)).concat("/").concat(boost)); //Formato: "agente chave mesmo trecho/IdeltaP/boost"
+//								}else{ //Se deltaP negativo, não posso ajudar em nada
+//									double correnteDeltaP = deltaP;
+//									msgEnviarPot.setContent(AC.concat("/").concat("0").concat("/").concat("0"));
+//								}
 								
 							    addBehaviour(new SubscriptionInitiator(myAgent,msgEnviarPot){
 							    	
@@ -404,7 +408,7 @@ public class agentePC extends Agent { /**
 									/**se entrar nesse if, será necessário consultar o XMl para averiguar se há dispositivos
 									 * armazenadores de energia
 									 */
-									exibirAviso(myAgent, "Entrei dentro do if do deltaP");
+//									exibirAviso(myAgent, "Entrei dentro do if do deltaP");
 									/*********************************************************************************
 									 * FIPA Contract Net Initiator para negociação com dispositivos de armazenamento
 									*******1**************************************************************************/
@@ -418,7 +422,7 @@ public class agentePC extends Agent { /**
 										
 								    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 	//												System.out.println("Entrou no if!!!!!");  //Só pra testar
-								    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
+//								    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
 								    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 								    	}
 								    	double PotenciaGeracaoTotal, valorPotGerRecebido = 0; //Inicialização da potência gerada por gerações intermitentes (
@@ -432,7 +436,7 @@ public class agentePC extends Agent { /**
 								    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
 										
 										protected void handlePropose(ACLMessage propose, Vector v) {
-											exibirMensagem(propose);
+//											exibirMensagem(propose);
 											
 	//										ACLMessage reply = propose.createReply();
 	//										reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -440,7 +444,7 @@ public class agentePC extends Agent { /**
 										}
 										
 										protected void handleRefuse(ACLMessage refuse) {
-											exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
+//											exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
 	
 	////									System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
 	//										
@@ -464,19 +468,19 @@ public class agentePC extends Agent { /**
 												
 										    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 	//														System.out.println("Entrou no if!!!!!");  //Só pra testar
-										    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
+//										    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
 										    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 										    	}
 										    }		
 										    negociarDeltaP.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-										    exibirAviso(myAgent, "o valor de deltaP é: "+deltaP);
+//										    exibirAviso(myAgent, "o valor de deltaP é: "+deltaP);
 										    deltaP = Math.abs(deltaP); //módulo de deltaP
 										    negociarDeltaP.setContent(String.valueOf(deltaP)); 
 										    
 										    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
 												
 												protected void handlePropose(ACLMessage propose, Vector v) {
-													exibirMensagem(propose);
+//													exibirMensagem(propose);
 													
 	//												ACLMessage reply = propose.createReply();
 	//												reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -484,7 +488,7 @@ public class agentePC extends Agent { /**
 												}
 												
 												protected void handleRefuse(ACLMessage refuse) {
-													exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
+//													exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
 													deltaP = 0;
 	////											System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
 	//												
@@ -499,10 +503,10 @@ public class agentePC extends Agent { /**
 												protected void handleFailure(ACLMessage failure) {
 													if (failure.getSender().equals(myAgent.getAMS())) {
 														// Notificação de erro feita pela plataforma
-														exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
+//														exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
 													}
 													else {
-														exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+//														exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
 													}										
 												} //Fim do handleFailure
 												
@@ -565,7 +569,7 @@ public class agentePC extends Agent { /**
 							  								
 							  						    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 							  		//									System.out.println("Entrou no if!!!!!");  //Só pra testar
-							  						    		exibirAviso(myAgent, "Solicitando corte de carga à " +nome);
+//							  						    		exibirAviso(myAgent, "Solicitando corte de carga à " +nome);
 							  						    		msg1.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 							  						    	}
 							  						    }
@@ -614,10 +618,10 @@ public class agentePC extends Agent { /**
 										protected void handleFailure(ACLMessage failure) {
 											if (failure.getSender().equals(myAgent.getAMS())) {
 												// Notificação de erro feita pela plataforma
-												exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
+//												exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
 											}
 											else {
-												exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+//												exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
 											}										
 										} //Fim do handleFailure
 										
@@ -679,7 +683,7 @@ public class agentePC extends Agent { /**
 								    
 	//								}//Fim do if deltaP<0
 									}else{
-										exibirAviso(myAgent, "deltaP é maior que zero (deltaP>0).");
+//										exibirAviso(myAgent, "deltaP é maior que zero (deltaP>0).");
 									}
 					    		}
 					    	}); //Fim do WakerBehaviour
@@ -712,7 +716,7 @@ public class agentePC extends Agent { /**
 							
 					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes de armazenamento no XML, então add ele como remetente
 //										System.out.println("Entrou no if!!!!!");  //Só pra testar
-					    		exibirAviso(myAgent, "Solicitando a "+nome+"que abra sua chave.");
+//					    		exibirAviso(myAgent, "Solicitando a "+nome+"que abra sua chave.");
 					    		msg1.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 					    	}
 					    }		
@@ -769,7 +773,7 @@ public class agentePC extends Agent { /**
 					    	
 					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 //										System.out.println("Entrou no if!!!!!");  //Só pra testar
-					    		exibirAviso(myAgent, "Solicitando valor de potencia gerada a " +nome);
+//					    		exibirAviso(myAgent, "Solicitando valor de potencia gerada a " +nome);
 					    		msgColetarPot.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 					    	}
 					    }
@@ -786,10 +790,10 @@ public class agentePC extends Agent { /**
 							 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
 							 */
 							protected void handleAgree(ACLMessage agree){
-								exibirMensagem(agree);
+//								exibirMensagem(agree);
 								double valorRecebido = Double.parseDouble(agree.getContent());
 								valorPotGerRecebido = Double.parseDouble(agree.getContent());
-								exibirAviso(myAgent, "Recebi um valor de "+valorPotGerRecebido+" de "+agree.getSender());
+//								exibirAviso(myAgent, "Recebi um valor de "+valorPotGerRecebido+" de "+agree.getSender());
 								PotenciaGeracaoTotal = PotenciaGeracaoTotal + valorPotGerRecebido; 
 								valorPotGerRecebido = 0;
 								
@@ -829,7 +833,7 @@ public class agentePC extends Agent { /**
 							
 					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 //										System.out.println("Entrou no if!!!!!");  //Só pra testar
-					    		exibirAviso(myAgent, "Solicitando valor de carga a " +nome);
+//					    		exibirAviso(myAgent, "Solicitando valor de carga a " +nome);
 					    		msgColetarPotCargas.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 					    	}
 					    }
@@ -845,10 +849,10 @@ public class agentePC extends Agent { /**
 							 * @see jade.proto.SubscriptionInitiator#handleAgree(jade.lang.acl.ACLMessage)
 							 */
 							protected void handleAgree(ACLMessage agree){
-								exibirMensagem(agree);
+//								exibirMensagem(agree);
 //								double valorRecebido = Double.parseDouble(agree.getContent());
 								valorPotDemRecebido = Double.parseDouble(agree.getContent());
-								exibirAviso(myAgent, "Recebi um valor de "+valorPotDemRecebido+" de "+agree.getSender());
+//								exibirAviso(myAgent, "Recebi um valor de "+valorPotDemRecebido+" de "+agree.getSender());
 								PotenciaDemandaTotal = PotenciaDemandaTotal + valorPotDemRecebido; 
 								valorPotDemRecebido = 0;
 //								exibirAviso(myAgent, "O valor da potencia gerada é: "+PotenciaGeracaoI);
@@ -866,7 +870,7 @@ public class agentePC extends Agent { /**
 						
 					    addBehaviour(new WakerBehaviour(myAgent, 1000) {
 					    	protected void handleElapsedTimeout() {
-					    		exibirAviso(myAgent, "Agent "+myAgent.getLocalName()+": It's wakeup-time. Bye...");
+//					    		exibirAviso(myAgent, "Agent "+myAgent.getLocalName()+": It's wakeup-time. Bye...");
 							    exibirAviso(myAgent, "A potência gerada total é: "+PotenciaGeracaoTotal);
 							    exibirAviso(myAgent, "A potência demandada total é: "+PotenciaDemandaTotal);
 							    deltaP = PotenciaGeracaoTotal - PotenciaDemandaTotal;
@@ -888,7 +892,7 @@ public class agentePC extends Agent { /**
 										/**se entrar nesse if, será necessário consultar o XMl para averiguar se há dispositivos
 										 * armazenadores de energia
 										 */
-										exibirAviso(myAgent, "Entrei dentro do if do deltaP");
+//										exibirAviso(myAgent, "Entrei dentro do if do deltaP");
 										/*********************************************************************************
 										 * FIPA Contract Net Initiator para negociação com dispositivos de armazenamento
 										 * ###PCC FECHADO
@@ -903,7 +907,7 @@ public class agentePC extends Agent { /**
 											
 									    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes geradores no XML, então add ele como remetente
 //														System.out.println("Entrou no if!!!!!");  //Só pra testar
-									    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
+//									    		exibirAviso(myAgent, "Solicitando deltaP a " +nome);
 									    		negociarDeltaP.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
 									    	}
 //									    	double PotenciaGeracaoTotal, valorPotGerRecebido = 0; //Inicialização da potência gerada por gerações intermitentes (
@@ -917,7 +921,7 @@ public class agentePC extends Agent { /**
 									    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
 											
 											protected void handlePropose(ACLMessage propose, Vector v) {
-												exibirMensagem(propose);
+//												exibirMensagem(propose);
 												
 //												ACLMessage reply = propose.createReply();
 //												reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -925,7 +929,7 @@ public class agentePC extends Agent { /**
 											}
 											
 											protected void handleRefuse(ACLMessage refuse) {  
-												exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
+//												exibirAviso(myAgent, "Negociação recusada por " + refuse.getSender().getLocalName());
 
 ////											System.out.println(getLocalName() + ": Enviando resposta para " + negocia.getSender().getLocalName());
 //												
@@ -942,10 +946,10 @@ public class agentePC extends Agent { /**
 											protected void handleFailure(ACLMessage failure) {
 												if (failure.getSender().equals(myAgent.getAMS())) {
 													// Notificação de erro feita pela plataforma
-													exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
+//													exibirAviso(myAgent, "Não existe agentes armazenadores de energia");
 												}
 												else {
-													exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
+//													exibirAviso(myAgent, "-<<"+nomeAgente+">>: o agente "+failure.getSender().getLocalName()+" falhou");
 												}										
 											} //Fim do handleFailure
 											
@@ -1017,7 +1021,7 @@ public class agentePC extends Agent { /**
 					    });	//fim do addBehaviour(new WakerBehaviour(myAgent, 1000) {
 						
 					}else{
-						exibirAviso(myAgent, "O PCC não está acusando nem 0 nem 1!! Problema");
+//						exibirAviso(myAgent, "O PCC não está acusando nem 0 nem 1!! Problema");
 					}
 				
 //					deltaP = PotenciaGeracaoTotal = PotenciaDemandaTotal= 0; //No final de tudo zera essas variáveis para começar todo o processo novamente
@@ -1055,7 +1059,7 @@ public class agentePC extends Agent { /**
 //					System.out.println("Agent "+getLocalName()+": Refuse");
 //					throw new RefuseException("check-failed");
 //				}
-				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
 				ACLMessage resposta = request.createReply();
 				
@@ -1096,7 +1100,7 @@ public class agentePC extends Agent { /**
 //					System.out.println("Agent "+getLocalName()+": Refuse");
 //					throw new RefuseException("check-failed");
 //				}
-				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
 				ACLMessage resposta = request.createReply();
 				resposta.setPerformative(ACLMessage.AGREE);

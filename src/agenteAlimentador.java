@@ -138,15 +138,15 @@ public class agenteAlimentador extends Agent {
 					    	Element elemento = (Element) i1.next();
 					    	String nome = String.valueOf(elemento.getName());
 					    	
-							exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande a abertura de seu religador.");
+//							exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande a abertura de seu religador.");
 							
 					    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
 					    		int referenciaDaChave = Integer.parseInt(nome.split("_")[1].split("R")[1]); //Analisa-se a posição da chave visada
 					    		
-					    		exibirAviso(myAgent, "A referência de "+nome+" é "+referenciaDaChave);
+//					    		exibirAviso(myAgent, "A referência de "+nome+" é "+referenciaDaChave);
 					    		
 					    		if(referenciaDaChave>referenciaDaChaveAtuante){ //Se a chave analisada estiver localizada a jusante da chave atuante então
-					    			exibirAviso(myAgent, "A referência de "+nome+" é maior que a da chave atuante que é "+referenciaDaChaveAtuante);
+//					    			exibirAviso(myAgent, "A referência de "+nome+" é maior que a da chave atuante que é "+referenciaDaChaveAtuante);
 					    			
 					    			if(elemento.getAttributeValue("atuacao").equals("nao")){ //Se o agente chave não é o que atuou então vou mandar uma mensagem pra ele
 						    			
@@ -369,6 +369,11 @@ public class agenteAlimentador extends Agent {
 							    
 							    addBehaviour(new ContractNetInitiator(myAgent, negociarDeltaP) {
 									
+									/**
+									 * 
+									 */
+									private static final long serialVersionUID = 1L;
+
 									protected void handlePropose(ACLMessage propose, Vector v) {
 										exibirMensagem(propose);
 						
@@ -464,7 +469,7 @@ public class agenteAlimentador extends Agent {
 										
 										exibirAviso(myAgent, "Eu aceitei a proposta de "+ALParticipante+", e a carga que ele se dispôs a dar é "+cargaDiponivel+" sendo que preciso de "+cargaTotalPerdida);
 									
-										if(cargaDiponivel>=cargaTotalPerdida){
+										if(cargaDiponivel>=cargaTotalPerdida){ //Se puder ser suprido tudo por outro alimentador, então
 											exibirAviso(myAgent, "A carga disponível "+cargaDiponivel+" é maior que "+cargaTotalPerdida);
 											
 											String chaveDeEncontro = agenteALBD.getChild("outrosALs").getChild(ALParticipante).getAttributeValue("chaveDeEncontro");
@@ -475,6 +480,28 @@ public class agenteAlimentador extends Agent {
 										     *********************************************************************************/
 									  		ACLMessage msg1 = new ACLMessage(ACLMessage.REQUEST);
 									  		msg1.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+									  		
+									  		//Cria-se uma lista para percorrer a tag chaves para eu poder avisar os agentes de chave para fechar
+									  		List lista2 = agenteALBD.getChild("chaves").getChildren();
+											Iterator i2 = lista2.iterator();
+											
+										    while(i2.hasNext()) { 
+										    	Element elemento2 = (Element) i2.next();
+										    	String nome2 = String.valueOf(elemento2.getName());  //nome do agente chave
+										    	
+												exibirAviso(myAgent, "A referencia da chave atuante é: "+referenciaDaChaveAtuante+". Vou ver se aviso a chave "+nome2+" para fechar.");
+												
+										    	if (nome2!= null && nome2.length()>0 && nome2!= "nenhum"){ //Se houver agentes chave no XML
+										    		int referenciaDaChave = Integer.parseInt(nome2.split("_")[1].split("R")[1]); //Analisa-se a posição da chave visada para análise se tem microrrede no mesmo trecho dele
+										    		
+										    		if(referenciaDaChave>=referenciaDaChaveAtuante + 2){ //Vou analisar a carga das microrredes a jusante do trehcho onde ocorreu a falta
+										    			msg1.addReceiver(new AID((String) nome2, AID.ISLOCALNAME));	
+									
+										    		}//fim do if
+										    	}//fim do if
+										    }//fim do while
+									  		
+									  		
 									  		msg1.addReceiver(new AID((String) chaveDeEncontro, AID.ISLOCALNAME));	
 									  	
 										    msg1.setContent("fechar");
@@ -576,7 +603,10 @@ public class agenteAlimentador extends Agent {
 													    	if (nome3!= null && nome3.length()>0 && nome3!= "nenhum"){ //Se houver microrredes no XML, então soma sua apotência
 													    		//soma a disponível com o boost da cac
 													    		//nesse zero. pegar valor de potDisponivel e da Cac
-													    		cargaTotalDisponivelMicrorrede = Double.parseDouble(elemento3.getAttributeValue("potenciaDisponivel")) + Double.parseDouble(elemento3.getAttributeValue("boost"));
+													    		
+//													    		cargaTotalDisponivelMicrorrede = Double.parseDouble(elemento3.getAttributeValue("potenciaDisponivel")) + Double.parseDouble(elemento3.getAttributeValue("boost"));
+													    		cargaTotalDisponivelMicrorrede = 0; //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<################
+													    		
 													    		//Tem-se um novo valor de cargaTotalDiponivel
 													    	}
 													    }
@@ -610,7 +640,7 @@ public class agenteAlimentador extends Agent {
 										    			
 										    			//Essa parte é só pra saber a contribuição só dessa microrrede (cargaDisponviel + boost), pois pode eu quero cortar a possibilidade de atender o trecho que ela estiver conectada ai tiro o valor dela dos cálculos
 										    			double cargaMicrorredeTrecho = 0;
-										    			//Quero saber a carga só da microrrede conectada a esse trecho
+										    			//Quero saber a carga só daS microrredeS conectada a esse trecho
 												  		List lista4 = agenteALBD.getChild("microrredes").getChild(nome).getChildren(); 
 														Iterator i4 = lista4.iterator();
 
@@ -628,6 +658,7 @@ public class agenteAlimentador extends Agent {
 														 
 										    			if(cargaDiponivel > cargaTotalPerdida){ //Na primeira iteração nunca será possível pois se já estamos aqui é porque não foi mesmo possível outro AL suprir tudo
 										    				refFechar = referenciaDaChave + 1; //Tenho que fechar os religadores até essa referência    
+										    				exibirAviso(myAgent, "A carga disponível é >"+cargaDiponivel+" e a carga total perdida é >"+cargaTotalPerdida+". No caso cargaDisponivel > cargaTotalPerdida");
 										    			}
 										    			else if(cargaDiponivel > cargaTotalPerdida - cargaTotalDisponivelMicrorrede){ //então olha-se a contribuição de microrredes
 										    				refFechar = referenciaDaChave + 1;
@@ -635,7 +666,7 @@ public class agenteAlimentador extends Agent {
 										    			}else{ //Se mesmo com microrredes não for possível
 										    				cargaTotalPerdida = cargaTotalPerdida - cargaTrecho;
 										    				cargaTotalDisponivelMicrorrede = cargaTotalDisponivelMicrorrede - cargaMicrorredeTrecho; //Como esse trecho terá que sair a microrrede sai tbm										    			}//Ai vai pra próxima iteração
-										    		
+										    				
 										    			}// Fim do if para saber se referenciaDaChave>referenciaDaChaveAtuante
 										    		}
 										    	}// Fim do if para saber se há chave
@@ -662,7 +693,9 @@ public class agenteAlimentador extends Agent {
 													    	int refChaveAnalisada = Integer.parseInt(nome5.split("_")[1].split("R")[1]);
 													    	
 													    	if (nome5!= null && nome5.length()>0 && nome5!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-													    		if(refChaveAnalisada>=refFechar){
+													    		
+//													    		if(refChaveAnalisada>=refFechar){ //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<########################################
+													    		if(refChaveAnalisada>refFechar){	
 													    			msg.addReceiver(new AID((String) nome5, AID.ISLOCALNAME)); //Adicionei a chave
 													    			
 													    			//Add agora as microrredes também
@@ -737,7 +770,8 @@ public class agenteAlimentador extends Agent {
 													    	int refChaveAnalisada = Integer.parseInt(nome5.split("_")[1].split("R")[1]);
 													    	
 													    	if (nome5!= null && nome5.length()>0 && nome5!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-													    		if(refChaveAnalisada>=refFechar){
+													    		
+													    		if(refChaveAnalisada>refFechar+1){ //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 													    			msg.addReceiver(new AID((String) nome5, AID.ISLOCALNAME)); //Adicionei a chave
 													    		}
 													    	}//Fim do if nome diferente de nada ou nenhum 
@@ -870,12 +904,12 @@ public class agenteAlimentador extends Agent {
 					
 					String agenteSender = subscription.getSender().getLocalName();
 					String diferenciar = agenteSender.substring(0, 2);
-					exibirAviso(myAgent, "Saber se é agente chave ou microrrede: "+diferenciar);
+//					exibirAviso(myAgent, "Saber se é agente chave ou microrrede: "+diferenciar);
 					
 					if(diferenciar.equalsIgnoreCase("AL")){
 						//Vou atualizar então esse valor no XML
 						String chave = subscription.getSender().getLocalName();
-						exibirAviso(myAgent, "Fui informado de um valor de carga pelo agente chave: "+chave);
+//						exibirAviso(myAgent, "Fui informado de um valor de carga pelo agente chave: "+chave);
 						agenteALBD.getChild("chaves").getChild(subscription.getSender().getLocalName()).setAttribute("carga",subscription.getContent());
 					}else{//SE não foi chave então é microrrede
 						String apc = subscription.getSender().getLocalName();
@@ -911,6 +945,10 @@ public class agenteAlimentador extends Agent {
 				 * 2 Ver limite da fonte limFonte >= Ipropria + Imultua?
 				 * 3 Analisa trecho por trecho para ver se não haverá sobrecarga 
 				 */
+				
+				ACLMessage propose = cfp.createReply();
+				propose.setPerformative(ACLMessage.PROPOSE);
+				
 				//Saber a própria carga. Sempre será a da primeira chave, visto que não está sendo analisado faltas duplas
 				String agenteChave1 = getLocalName().concat("_R1");	//saber a carga do primeiro agente chave			
 				double cargaPropria = Double.parseDouble(agenteALBD.getChild("chaves").getChild(agenteChave1).getAttributeValue("carga")); //Carga própria do AL participante ou solicitado
@@ -930,31 +968,43 @@ public class agenteAlimentador extends Agent {
 					List lista = agenteALBD.getChild("chaves").getChildren(); 
 					Iterator i = lista.iterator();
 					
+					int cont = 0;  //Só pra ver se o while analisa os trechos na sequencia certa do trecho mais a jusante R1 para o a montate..
 				    while(i.hasNext()) { 
 				    	Element elemento = (Element) i.next();
 				    	String nome = String.valueOf(elemento.getName());
+				    	
+				    	cont = cont+1;
+				    	exibirAviso(myAgent, "Analisando sobrecarga no trecho da chave: "+nome+". O valor de cont é: "+cont);
 				    	
 				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML
 				    		double cargaDoTrecho = Double.parseDouble(elemento.getAttributeValue("carga"));
 				    		double capacidadeDoCondutor = Double.parseDouble(elemento.getAttributeValue("capacidade"));
 				    		
+				    		exibirAviso(myAgent, "A carga do trecho da chave >"+nome+" é >"+cargaDoTrecho+". A capacidade de seu condutor é > "+capacidadeDoCondutor);
+				    		
 				    		if(capacidadeDoCondutor >= cargaDoTrecho + cargaDisponivel){
-				    			exibirAviso(myAgent, "Não há sobrecarga no meu trecho. ");
+				    			exibirAviso(myAgent, "Não há sobrecarga no trecho de "+nome);
 				    			//E não altero o valor de carga disponível
 				    		}
 				    		else{
-				    			exibirAviso(myAgent, "Há sobrecarga no meu trecho com os valores solicitados. ");
-				    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
+//				    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
+				    			cargaDisponivel = (capacidadeDoCondutor - cargaDoTrecho);
+				    			exibirAviso(myAgent, "Há sobrecarga no trecho de "+nome+". O valor de carga disponível passa a ser: "+cargaDisponivel);
 				    		}
 				    		
 				    	}// Fim do if (nome!= null && nome.length()>0 && nome!= "nenhum")
 				    }// Fim do while
 					
+//				    ACLMessage propose = cfp.createReply();
+//					propose.setPerformative(ACLMessage.PROPOSE);
+					propose.setContent(String.valueOf(cargaDisponivel));
+//					return propose;
 				}// Fim do if(limFonte >= cargaPropria + cargaSolicitada)
-				else{ //Se não puder suprir tudo, ele deverá suprir pelo menos uma parte
+				else{ //Se não puder suprir tudo, ele deverá suprir pelo menos uma parte. AQUI AINDA É EM TERMOS DE FONTE E NÃO DE TRECHO
 					exibirAviso(myAgent, "Não posso suprir todo o valor solicitado que é de >"+cargaSolicitada+", mas posso suprir >");
 					
-					cargaSolicitada = (limFonte - cargaPropria)*0.9; //A carga solicitada passa a ser só o que o AL é capaz de suprir
+//					cargaSolicitada = (limFonte - cargaPropria)*0.9; //A carga solicitada passa a ser só o que o AL é capaz de suprir
+					cargaSolicitada = (limFonte - cargaPropria); //A carga solicitada passa a ser só o que o AL é capaz de suprir
 					
 					//Verificar agora se não há sobrecargas em cada trecho com o valor de carga solicitada recalculado
 					List lista = agenteALBD.getChild("chaves").getChildren(); 
@@ -972,21 +1022,27 @@ public class agenteAlimentador extends Agent {
 				    			exibirAviso(myAgent, "Não há sobrecarga no meu trecho. ");
 				    		}
 				    		else{
-				    			exibirAviso(myAgent, "Há sobrecarga no meu trecho com os valores solicitados. ");
-				    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
+				    			
+//				    			cargaDisponivel = (capacidadeDoCondutor - cargaSolicitada)*0.9;
+				    			cargaDisponivel = (capacidadeDoCondutor - cargaDoTrecho);
+				    			exibirAviso(myAgent, "Há sobrecarga no trecho de "+nome+". O valor de carga disponível passa a ser: "+cargaDisponivel);
 				    		}
 				    		
 				    	}// Fim do if (nome!= null && nome.length()>0 && nome!= "nenhum")
 				    }// Fim do while
-				}
+				    
+//				    ACLMessage propose = cfp.createReply();
+//					propose.setPerformative(ACLMessage.PROPOSE);
+					propose.setContent(String.valueOf(cargaDisponivel));
+//					return propose;
+				}//Fim da análise de capacidade da fonte, se dá pra suprir tudo ou só uma parte
 				
-				ACLMessage propose = cfp.createReply();
-				propose.setPerformative(ACLMessage.PROPOSE);
-//					propose.setContent(String.valueOf(valorSOC));
-				propose.setContent(String.valueOf(cargaDisponivel));
+//				ACLMessage propose = cfp.createReply();
+//				propose.setPerformative(ACLMessage.PROPOSE);
+//				propose.setContent(String.valueOf(cargaDisponivel));
 				return propose;
 //				
-			}
+			}//Fim do handle cfp
 
 			protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose,ACLMessage accept) throws FailureException {
 ////				System.out.println("Agent "+getLocalName()+": Proposal accepted");
@@ -994,7 +1050,7 @@ public class agenteAlimentador extends Agent {
 ////					System.out.println("Agent "+getLocalName()+": Action successfully performed");
 					ACLMessage inform = accept.createReply();
 					inform.setPerformative(ACLMessage.INFORM);
-					inform.setContent(cfp.getContent());
+					inform.setContent(accept.getContent());
 //					//Antes eu dou uma atualizada no XML
 //					agenteAABD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
 //					agenteAABD.getChild("comando").getChild("status").setText("0"); //seta no XML o modo de tensão pois no matlab tem um NOT que enviará 1 para a fonte de tensão

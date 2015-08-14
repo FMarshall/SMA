@@ -117,7 +117,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 				//if(msg_curto!=null && msg_curto.getContent()=="curto"){
 				//if(msg_curto!=null && conteudo=="curto"){
 				if(msg!=null){	
-					exibirMensagem(msg);
+//					exibirMensagem(msg);
 					
 					/**
 					 * Método para fazer o teste de conexão com o matlab para entender o código em matlab
@@ -140,7 +140,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 					 * Parte de medição e aquisição de dados e armazenamento no XML
 					 */
 					String conteudo = msg.getContent();  //Pego o conteudo da mensagem
-					exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+conteudo);
+//					exibirAviso(myAgent, "O conteúdo da msg que recebi é: "+conteudo);
 					
 					String SOC = conteudo.split("/")[0]; /* A mensagem é no formato:  "SOC/estado da chave/modo atuação". Foi aplicado o método split para quebrar o "conteudo" em 
 					array sendo a separação definida pelo caracter "/". // Da separação eu peguei a posição 0 da array que corresponde ao SOC do dispositivo monitorado.*/
@@ -177,16 +177,16 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 
 			protected ACLMessage handleCfp(ACLMessage cfp) throws NotUnderstoodException, RefuseException {
 //				System.out.println("Agent "+getLocalName()+": CFP received from "+cfp.getSender().getName()+". Action is "+cfp.getContent());
-				exibirMensagem(cfp);
+//				exibirMensagem(cfp);
 							
 //				valorSOC = Double.parseDouble(((Element) agenteAABD.getContent()).getText());
 				double valorSOC = Double.parseDouble(agenteAABD.getChild("medidasAtuais").getChild("soc").getText());
-				exibirAviso(myAgent, "O SOC está em "+valorSOC);
+//				exibirAviso(myAgent, "O SOC está em "+valorSOC);
 				
 				if (valorSOC > 80) {
 					// We provide a proposal
 //					System.out.println("Agent "+getLocalName()+": Proposing "+proposal);
-					exibirAviso(myAgent, "Aceito a solicitação de deltaP igual a: "+cfp.getContent());
+//					exibirAviso(myAgent, "Aceito a solicitação de deltaP igual a: "+cfp.getContent());
 					ACLMessage propose = cfp.createReply();
 					propose.setPerformative(ACLMessage.PROPOSE);
 //					propose.setContent(String.valueOf(valorSOC));
@@ -196,7 +196,7 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 				else {
 					// We refuse to provide a proposal
 //					System.out.println("Agent "+getLocalName()+": Refuse");
-					exibirAviso(myAgent, "Recusei o pedido de deltaP");
+//					exibirAviso(myAgent, "Recusei o pedido de deltaP");
 					throw new RefuseException("O SOC da bateria está abaixo de SOC!");
 				}
 			}
@@ -237,22 +237,8 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 			private static final long serialVersionUID = 1L;
 
 			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
-//				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
-//				if (checkAction()) {
-//					// We agree to perform the action. Note that in the FIPA-Request
-//					// protocol the AGREE message is optional. Return null if you
-//					// don't want to send it.
-//					System.out.println("Agent "+getLocalName()+": Agree");
-//					ACLMessage agree = request.createReply();
-//					agree.setPerformative(ACLMessage.AGREE);
-//					return agree;
-//				}
-//				else {
-//					// We refuse to perform the action
-//					System.out.println("Agent "+getLocalName()+": Refuse");
-//					throw new RefuseException("check-failed");
-//				}
-				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+
+//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
 				ACLMessage resposta = request.createReply();
 				

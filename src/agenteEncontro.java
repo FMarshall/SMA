@@ -82,7 +82,7 @@ public class agenteEncontro extends Agent{
 				ACLMessage msg = receive(fitro_Inform);
 				
 				if(msg != null){
-					exibirMensagem(msg);
+//					exibirMensagem(msg);
 										
 					String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
 					
@@ -121,7 +121,7 @@ public class agenteEncontro extends Agent{
 //					System.out.println("Agent "+getLocalName()+": Refuse");
 //					throw new RefuseException("check-failed");
 //				}
-				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
 				ACLMessage resposta = request.createReply();
 				resposta.setPerformative(ACLMessage.AGREE);

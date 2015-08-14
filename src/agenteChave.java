@@ -84,10 +84,10 @@ public class agenteChave extends Agent{
 				ACLMessage msg = receive(fitro_Inform);
 				
 				if(msg != null){
-					exibirMensagem(msg);
+//					exibirMensagem(msg);
 					String conteudo = msg.getContent();
-//					exibirAviso(myAgent, "O conteudo da mensagem é: "+msg.getContent());
-					exibirAviso(myAgent, "O conteudo da mensagem é: "+conteudo);
+//			
+//					exibirAviso(myAgent, "O conteudo da mensagem é: "+conteudo);
 					
 //					String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
 //					
@@ -96,7 +96,7 @@ public class agenteChave extends Agent{
 //				    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
 					
 					if(msg.getContent().equalsIgnoreCase("curto")) {
-						exibirAviso(myAgent, "detectei um curto");
+//						exibirAviso(myAgent, "detectei um curto");
 						
 						agenteCBD.getChild("estado").setText("0"); //seto a TAG "estado" do XML como aberta ("0")
 						agenteCBD.getChild("comando").setText("0"); //quando o agente  for responder ao matlab enviando um sinal de comando ele irá querer a chave continuando aberta
@@ -109,7 +109,7 @@ public class agenteChave extends Agent{
 						msgColetarPot.setContent("falta");
 						
 						String AL = getLocalName().split("_")[0]; //Só para identificar o seu AL para poder se comunicar
-						exibirAviso(myAgent, "Vou avisar da falta para "+AL);
+//						exibirAviso(myAgent, "Vou avisar da falta para "+AL);
 						msgColetarPot.addReceiver(new AID((String) AL, AID.ISLOCALNAME));
 											    
 					    addBehaviour(new SubscriptionInitiator(myAgent,msgColetarPot){
@@ -135,7 +135,7 @@ public class agenteChave extends Agent{
 						 * O camando será enviado como resposta ao inform da medição para o Matlab
 						 */
 						String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
-						exibirAviso(myAgent, "O comando da chave é: "+comandoChave);							
+//						exibirAviso(myAgent, "O comando da chave é: "+comandoChave);							
 						ACLMessage resposta = msg.createReply();
 						resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
 					    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
@@ -144,13 +144,13 @@ public class agenteChave extends Agent{
 					else { //Se não for curto, então recebo o valor de potência do trecho para atualização
 						//Mas primeiro analisa-se se já não há houve atuação da chave. Se já tiver havido atuação, ela não manda nada para poder o AL utilizar dados pré-falta
 						String estado = agenteCBD.getChildText("estado");
-						exibirAviso(myAgent, "O estado de minha chave é: "+estado);
+//						exibirAviso(myAgent, "O estado de minha chave é: "+estado);
 						if(estado.equals("1")){
 							/*
 							 * Parte de medição e aquisição de dados e armazenamento no XML
 							 */
 							String carga = msg.getContent();  //Pego o conteudo da mensagem que veio do inform do matalab
-							exibirAviso(myAgent, "Recebi um valor de carg de: "+carga);
+//							exibirAviso(myAgent, "Recebi um valor de carg de: "+carga);
 							
 							//O conteudo do agente chave é somente o valor de corrente demandada no seu trecho
 							agenteCBD.getChild("carga").setText(carga);	//seta o XML do agente atualizando o valor da corrente demandada
@@ -164,7 +164,7 @@ public class agenteChave extends Agent{
 							msgInformarPot.setContent(carga);
 							
 							String AL = agenteChave.split("_")[0]; //Só para identificar o seu AL para poder se comunicar
-							exibirAviso(myAgent, "Vou informar o valor de carga demandada à "+AL);
+//							exibirAviso(myAgent, "Vou informar o valor de carga demandada à "+AL);
 							msgInformarPot.addReceiver(new AID((String) AL, AID.ISLOCALNAME));
 												    
 						    addBehaviour(new SubscriptionInitiator(myAgent,msgInformarPot){
@@ -188,7 +188,7 @@ public class agenteChave extends Agent{
 							 * O camando será enviado como resposta ao inform da medição para o Matlab
 							 */
 							String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
-							exibirAviso(myAgent, "O comando da chave é: "+comandoChave);						
+//							exibirAviso(myAgent, "O comando da chave é: "+comandoChave);						
 							ACLMessage resposta = msg.createReply();
 							resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
 						    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
@@ -200,7 +200,7 @@ public class agenteChave extends Agent{
 							 * O camando será enviado como resposta ao inform da medição para o Matlab
 							 */
 							String comandoChave = agenteCBD.getChild("comando").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
-							exibirAviso(myAgent, "O comando da chave é: "+comandoChave);						
+//							exibirAviso(myAgent, "O comando da chave é: "+comandoChave);						
 							ACLMessage resposta = msg.createReply();
 							resposta.setContent(comandoChave); //seta o conteudo da mensagem como o comando da chave que poderá ser aberta ou fechada
 						    send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
@@ -248,7 +248,7 @@ public class agenteChave extends Agent{
 //					System.out.println("Agent "+getLocalName()+": Refuse");
 //					throw new RefuseException("check-failed");
 //				}
-				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
 				ACLMessage resposta = request.createReply();
 				resposta.setPerformative(ACLMessage.AGREE);
@@ -288,7 +288,7 @@ public class agenteChave extends Agent{
 //					System.out.println("Agent "+getLocalName()+": Refuse");
 //					throw new RefuseException("check-failed");
 //				}
-				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
+//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
 				ACLMessage resposta = request.createReply();
 				resposta.setPerformative(ACLMessage.AGREE);
