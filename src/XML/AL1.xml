@@ -22,7 +22,7 @@
       </AL1_R2>
       
       <AL1_R3>
-          <nenhum potenciaDisponivel="0"  boost="0" />
+          <APC1 potenciaDisponivel="0"  boost="0" />
       </AL1_R3>  
     </microrredes>
     

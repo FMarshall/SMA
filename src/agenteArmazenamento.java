@@ -227,9 +227,9 @@ public class agenteArmazenamento extends Agent { // Classe "agenteArmazenamento"
 			}
 		} ); //Fim do comportamento contract net
 		
-		/**
+		/**************************************************************************
 		 * FIPA Request Responder para responder a solicitação do APC para ilhar
-		 */
+		 ***************************************************************************/
 		addBehaviour(new AchieveREResponder(this, filtroIlha) {
 			/**
 			 * 

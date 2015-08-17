@@ -81,6 +81,9 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
 				MessageTemplate.MatchPerformative(ACLMessage.CFP) );   //Filtro do contract net com o APC
 		
+		final MessageTemplate filtroFechar = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+		  		MessageTemplate.MatchContent("fechar")); //filtro do apc mandando fechar para dar boost na recomposição
+		
 //		System.out.println(".:: Agente PCC APCC1 iniciado com sucesso! ::.\n");
 //		System.out.println("Todas as minhas informações: \n" +getAID());
 //		System.out.println(">> Meu nome local é " + getLocalName()); // Informações completas
@@ -202,6 +205,29 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 				
 			}
 		} ); //Fim do comportamento contract net
+		
+		/**************************************************************************
+		 * FIPA Request Responder para responder a solicitação do APC para fechar dando suporte a recomposição (boost)
+		 ***************************************************************************/
+		addBehaviour(new AchieveREResponder(this, filtroFechar) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
+
+				ACLMessage resposta = request.createReply();
+				resposta.setContent("ok");
+				
+				//Antes eu dou uma atualizada no XML
+				agenteGCBD.getChild("comando").getChild("estadoChave").setText("1"); /*seta o XML o disjuntor fechando para quando o agente receber o informe de monitoramento, ele ler
+				 																		o esse valor de xml e respodner comandando a chave*/
+				
+				
+				return resposta;
+			}
+		} );//Fim do request responder
 		
 	} // fim do public void setup
 	
