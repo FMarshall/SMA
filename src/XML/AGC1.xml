@@ -11,7 +11,7 @@
         <!-- comando-->
    <comando>
     <estadoChave>0</estadoChave> <!-- Inicialmente tem que ser setado com valor 0-->
-    <potNominal>50</potNominal> 
+    <potNominal>16677.7</potNominal>  <!-- 50e3/3  16666.7-->
    </comando>  
 
   

@@ -169,7 +169,12 @@ public class agentePC extends Agent { /**
 					String AC = agenteApcBD.getChildText("agenteChave");
 					
 //					String boost = agenteApcBD.getChild("medidasAtuais").get <--para esse tenho que fazer um while, ver se tem fonte controlada e pegar o valor de capacidade dela. Esse valor tem que ser atualizado por essa fonte
-					String boost = String.valueOf(50000/13800); //"3.62"; //carga nominal da Cac
+					
+//					double correnteBoost = 50e3/(13.8e3/Math.sqrt(3));
+					double correnteBoost = 2.1;
+					
+//					String boost = String.valueOf(50000/13800); //"3.62"; //carga nominal da Cac
+					String boost = String.valueOf(correnteBoost); //"3.62"; //carga nominal da Cac
 					
 					/*
 					 * Se deltaP positivo, então a uRede está injetando, logo quando AL initiator for solicitar tem-se IPerdida = Imedida + IuRede 
@@ -1150,6 +1155,7 @@ public class agentePC extends Agent { /**
 //				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
 				ACLMessage resposta = request.createReply();
+				resposta.setPerformative(ACLMessage.AGREE);
 				resposta.setContent("Ok");
 				
 				/**********************************************************************************
@@ -1175,6 +1181,11 @@ public class agentePC extends Agent { /**
 			    msg.setContent("fechar");
 		  		
 		  		addBehaviour(new AchieveREInitiator(myAgent, msg) {
+					/**
+					 * 
+					 */
+					private static final long serialVersionUID = 1L;
+					
 					protected void handleInform(ACLMessage inform) {
 //						System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
 					}

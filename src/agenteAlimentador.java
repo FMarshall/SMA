@@ -410,7 +410,7 @@ public class agenteAlimentador extends Agent {
 									protected void handleAllResponses(Vector responses, Vector acceptances) {
 
 										// Evaluate proposals.
-										double bestProposal = -1;
+										double bestProposal = 40;
 										AID bestProposer = null;
 										ACLMessage accept = null;
 										
@@ -925,7 +925,9 @@ public class agenteAlimentador extends Agent {
 						String boost = subscription.getContent().split("/")[1]; //Potencia da Cac que ainda pode ser dado
 						
 						agenteALBD.getChild("microrredes").getChild(agenteChave).getChild(nomeAPC).setAttribute("potenciaDisponivel",potenciaMicrorrede);
-						agenteALBD.getChild("microrredes").getChild(agenteChave).getChild(nomeAPC).setAttribute("potenciaBoost",boost);
+						agenteALBD.getChild("microrredes").getChild(agenteChave).getChild(nomeAPC).setAttribute("boost",boost);
+						
+						exibirAviso(myAgent, "Recebi uma atualização com o valor de boost igual a >"+boost+" da microrrede do agente >"+apc);
 					}
 					
 				}
@@ -997,18 +999,24 @@ public class agenteAlimentador extends Agent {
 					    		while(i2.hasNext()) {//While só pra saber o boost de todas as microrredes conectadas a esse trecho tendo o agente chave como responsável 
 							    	Element elemento2 = (Element) i2.next();
 							    	String nome2 = String.valueOf(elemento2.getName()); //Nome da microrrede
-							    	exibirAviso(myAgent, "Vou analisar >>>"+nome2);
+//							    	exibirAviso(myAgent, "Vou analisar a microrrede >>>"+nome2+" no trecho >"+nome2);
 							    	
 							    	if (nome2!= null && nome2.length()>0 && nome2!= "nenhum"){ //Se houver agentes apc no XML
 							    		exibirAviso(myAgent, "Analisando se a microrrede "+nome2+" está injetando potência na rede.");
 							    		IdisponivelDaMicrorrede = IdisponivelDaMicrorrede + Double.parseDouble(elemento2.getAttributeValue("boost"));
+							    		exibirAviso(myAgent, "O valor do boost é: "+elemento2.getAttributeValue("boost"));
+							    		
 							    		//colocar um array pegando o nome dessa microrrede ################################################################################################
 							    		nomesAPCs.add(nome2); //add aqui o nome da microrrede
 //							    		contUREDE = contUREDE+1;
-							    		
+							    		exibirAviso(myAgent, "O valor da contribuição de microrredes em >" +nome+" é >"+IdisponivelDaMicrorrede);
 							    	}//fim do if para saber se nome2 diferente de nenhum
+							    	else{// senão, então não há microrredes 
+							    		exibirAviso(myAgent, "Não há microrredes no mesmo trecho monitorado por "+nome);
+							    	}
 					    		}//Fim do while para percorrer as microrredes
-					    		exibirAviso(myAgent, "O valor da contribuição de microrredes em >" +nome+" é >"+IdisponivelDaMicrorrede);
+					    		
+//					    		exibirAviso(myAgent, "O valor da contribuição de microrredes em >" +nome+" é >"+IdisponivelDaMicrorrede);
 					    		
 					    		double cargaDoTrecho = Double.parseDouble(elemento.getAttributeValue("carga"));
 					    		double capacidadeDoCondutor = Double.parseDouble(elemento.getAttributeValue("capacidade"));
@@ -1018,7 +1026,7 @@ public class agenteAlimentador extends Agent {
 					    		if(capacidadeDoCondutor >= cargaDoTrecho + cargaDisponivel + IdisponivelDaMicrorrede){
 					    			cargaDisponivel = cargaDisponivel + IdisponivelDaMicrorrede;
 					    			//E não altero o valor de carga disponível
-					    			exibirAviso(myAgent, "Não há sobrecarga no trecho de "+nome+" com a contribuição de microrrede");
+					    			exibirAviso(myAgent, "Não há sobrecarga no trecho de "+nome+" com a contribuição de microrrede com valor de >"+IdisponivelDaMicrorrede);
 					    		}
 					    		else if(capacidadeDoCondutor >= cargaDoTrecho + cargaDisponivel){
 					    			//Não altero o valor de carga disponível
@@ -1114,7 +1122,7 @@ public class agenteAlimentador extends Agent {
 					int quantUREDE = nomesAPCs.size();
 //					if(contUREDE>0){ //preciso solicitar microrrede(s) que dêem um boost acionando geração controlada
 					if(quantUREDE>0){	
-						
+						exibirAviso(myAgent, "Há microrredes pra serem solicitadas suas fontes controladas. Ao todo: "+quantUREDE);
 						/**********************************************************************************
 					     * Protocolo FIPA Request Initiator para solicitar microrrede acionem suas gerações controladas
 					     * 
@@ -1123,6 +1131,7 @@ public class agenteAlimentador extends Agent {
 				  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 					  		
 				  		for (int i=0; i<quantUREDE; i++) {
+				  			exibirAviso(myAgent,"Adicionando a microrrede >"+nomesAPCs.get(i)+" na mensagem request para solicitar que use a CaC");
 				  	      msg.addReceiver(new AID((String) nomesAPCs.get(i), AID.ISLOCALNAME));
 				  		}
 				  		

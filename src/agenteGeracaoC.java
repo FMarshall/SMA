@@ -218,6 +218,7 @@ public class agenteGeracaoC extends Agent { // Classe "agenteGeracaoC" que por s
 			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 
 				ACLMessage resposta = request.createReply();
+				resposta.setPerformative(ACLMessage.AGREE);
 				resposta.setContent("ok");
 				
 				//Antes eu dou uma atualizada no XML
