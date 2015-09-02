@@ -3,8 +3,8 @@
 <!--Banco de Dados do Agente PC-->
 
 <agentePC  nome = "APC1">   <!-- Pode ser que seja necessario usar um nome local e um nome global. O nome global eh para os agentes dispositivos -->
-		 <agenteAlimentador>AL1</agenteAlimentador>
-      <agenteChave>AL1_R3</agenteChave>
+		 <agenteAlimentador>AL2</agenteAlimentador>
+      <agenteChave>AL2_R2</agenteChave>
     <!-- Pontos de Medida -->
     
     <medidasAtuais>

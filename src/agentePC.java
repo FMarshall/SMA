@@ -170,8 +170,8 @@ public class agentePC extends Agent { /**
 					
 //					String boost = agenteApcBD.getChild("medidasAtuais").get <--para esse tenho que fazer um while, ver se tem fonte controlada e pegar o valor de capacidade dela. Esse valor tem que ser atualizado por essa fonte
 					
-//					double correnteBoost = 50e3/(13.8e3/Math.sqrt(3));
-					double correnteBoost = 2.1;
+					double correnteBoost = (100e3)/(13.8e3/Math.sqrt(3));
+//					double correnteBoost = 2.1;
 					
 //					String boost = String.valueOf(50000/13800); //"3.62"; //carga nominal da Cac
 					String boost = String.valueOf(correnteBoost); //"3.62"; //carga nominal da Cac

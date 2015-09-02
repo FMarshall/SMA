@@ -16,7 +16,7 @@
       </AL2_R1>  
          
       <AL2_R2>
-          <nenhum  potenciaDisponivel="0"  boost="0" /> <!-- APC1 -->
+          <APC1  potenciaDisponivel="0"  boost="0" /> <!-- APC1 -->
       </AL2_R2>
     </microrredes>
     

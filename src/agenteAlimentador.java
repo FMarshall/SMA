@@ -410,7 +410,7 @@ public class agenteAlimentador extends Agent {
 									protected void handleAllResponses(Vector responses, Vector acceptances) {
 
 										// Evaluate proposals.
-										double bestProposal = 40;
+										double bestProposal = -1;
 										AID bestProposer = null;
 										ACLMessage accept = null;
 										
@@ -419,14 +419,38 @@ public class agenteAlimentador extends Agent {
 											ACLMessage msgProposta = (ACLMessage) e.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
 											
 											if (msgProposta.getPerformative() == ACLMessage.PROPOSE){ //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
-												ACLMessage resposta = msgProposta.createReply(); //será criada então uma resposta para essa mensagem
-												acceptances.addElement(resposta);
+//												ACLMessage resposta = msgProposta.createReply(); //será criada então uma resposta para essa mensagem
+//												acceptances.addElement(resposta);
 												
 												double proposal = Double.parseDouble(msgProposta.getContent()); //Aqui ele pega a propostas para avaliá-la
 												if (proposal > bestProposal){
 													bestProposal = proposal;
 													bestProposer = msgProposta.getSender();
-//																		
+																		
+//													resposta.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // seta a performativa logo como Reject_PROPOSAL
+//													resposta.setContent(String.valueOf(bestProposal));
+//																		accept = resposta;
+//																		accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+												}else{
+//													resposta.setPerformative(ACLMessage.REJECT_PROPOSAL); // seta a performativa logo como Reject_PROPOSAL
+//													resposta.setContent(String.valueOf(proposal));
+												}
+											}//Fim do if msg.getPErformative() == ACLMessage.PROPOSE
+										}//Fim do while (e.hasMoreElements()) 
+										
+										Enumeration e1 = responses.elements();  //a variável "e" será uma espécie de vetor de elementos, onde os elementos serão as mensagens recebidas
+										while (e1.hasMoreElements()) { //um while só pra percorrer todas as posições do vetor "e"
+											ACLMessage msgProposta = (ACLMessage) e1.nextElement();  //a variável msg receberá a cada iteração uma mensagem recebida que corresponde a cada posição de "e"
+											
+											if (msgProposta.getPerformative() == ACLMessage.PROPOSE){ //Se a performativa da mensagem msg for uma proposta (PROPOSE), então entra no SE
+												ACLMessage resposta = msgProposta.createReply(); //será criada então uma resposta para essa mensagem
+												acceptances.addElement(resposta);
+												
+												double proposal = Double.parseDouble(msgProposta.getContent()); //Aqui ele pega a propostas para avaliá-la
+												if (proposal == bestProposal){
+													bestProposal = proposal;
+													bestProposer = msgProposta.getSender();
+																		
 													resposta.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // seta a performativa logo como Reject_PROPOSAL
 													resposta.setContent(String.valueOf(bestProposal));
 //																		accept = resposta;
