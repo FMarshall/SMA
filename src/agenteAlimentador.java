@@ -561,93 +561,14 @@ public class agenteAlimentador extends Agent {
 											
 										}//if(cargaDiponivel>cargaTotalPerdida)
 										else{//Se não for possível outro alimentador suprir tudo, então tem-se que analisar tirando trechos
-											//colocar ref chave atuante global
-											//for refChaveAtu + 1
-											//ver se tem microrredes desse trecho em diante e sew com microrredes da certo entao
-											// potMicrorrde + potDispo > potPerdida?
-											// se não, potPerdida  = potPerdida - refCahve
-											// potDispo > potPerdidaNova
-											
-//											//Cria-se uma lista para percorrer a tag CHAVES (agentes chave)
-//									  		List lista = agenteALBD.getChild("chaves").getChildren(); 
-//											Iterator i = lista.iterator();
-////											int cont = 0;					
-//											
-//										    while(i.hasNext()) { 
-//										    	Element elemento = (Element) i.next();
-//										    	String nome = String.valueOf(elemento.getName());
-//										    	
-////												exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
-//												
-//										    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-//										    		int referenciaDaChave = Integer.parseInt(nome.split("_")[1].split("R")[1]); //Analisa-se a posição da chave visada
-//										    		
-//										    		exibirAviso(myAgent, "A referência de "+nome+" é "+referenciaDaChave);
-//										    		
-//										    		if(referenciaDaChave>referenciaDaChaveAtuante){ //Se a chave analisada estiver localizada a jusante da chave atuante então
-//										    			exibirAviso(myAgent, "A referência de "+nome+" é maior que a da chave atuante que é "+referenciaDaChaveAtuante);
-////										    				cont=cont+1;
-//										    		
-//////										    			if(elemento.getAttributeValue("atuacao").equals("nao")){ //Se o agente chave não é o que atuou então vou mandar uma mensagem pra ele
-////											    			List lista1 = agenteALBD.getChild("microrredes").getChild(nome).getChildren(); 
-////															Iterator i1 = lista1.iterator();
-////										    				
-////										    				while(i1.hasNext()) { 
-////														    	Element elemento1 = (Element) i1.next();
-////														    	String nome1 = String.valueOf(elemento1.getName());
-////														    	
-////	//															exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
-////																
-////														    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-////														    	}
-////										    				}//Fim do segundo while
-////												    		cargaPerdida = 0; //Acho que nem precisa disso não
-////										    			}// Fim do if para saber se atuou ou não
-//										    		}// Fim do if para saber se referenciaDaChave>referenciaDaChaveAtuante
-//										    	}// Fim do if para saber se há chave
-//										    }// Fim do while(i.hasNext())
-										    
-										  //Cria-se uma lista para percorrer a tag microrredes e somar todas as contribuições somatório de (potenciaDisponivel + boost) das microrredes conectadas aos trechos a jusante da falta
-									  		List lista2 = agenteALBD.getChild("microrredes").getChildren();
-											Iterator i2 = lista2.iterator();
-											
-										    while(i2.hasNext()) { 
-										    	Element elemento2 = (Element) i2.next();
-										    	String nome2 = String.valueOf(elemento2.getName());
-										    	
-//												exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
-												
-										    	if (nome2!= null && nome2.length()>0 && nome2!= "nenhum"){ //Se houver agentes chave no XML
-										    		int referenciaDaChave = Integer.parseInt(nome2.split("_")[1].split("R")[1]); //Analisa-se a posição da chave visada para análise se tem microrrede no mesmo trecho dele
-										    		
-										    		if(referenciaDaChave>referenciaDaChaveAtuante){ //Vou analisar a carga das microrredes a jusante do trehcho onde ocorreu a falta
-										    			List lista3 = agenteALBD.getChild("microrredes").getChildren();
-														Iterator i3 = lista3.iterator();
-														
-													    while(i3.hasNext()) { 
-													    	Element elemento3 = (Element) i3.next();
-													    	String nome3 = String.valueOf(elemento3.getName());
-													    	if (nome3!= null && nome3.length()>0 && nome3!= "nenhum"){ //Se houver microrredes no XML, então soma sua apotência
-													    		//soma a disponível com o boost da cac
-													    		//nesse zero. pegar valor de potDisponivel e da Cac
-													    		
-//													    		cargaTotalDisponivelMicrorrede = Double.parseDouble(elemento3.getAttributeValue("potenciaDisponivel")) + Double.parseDouble(elemento3.getAttributeValue("boost"));
-													    		cargaTotalDisponivelMicrorrede = 0; //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<################
-													    		
-													    		//Tem-se um novo valor de cargaTotalDiponivel
-													    	}
-													    }
-										    		}//fim do if
-										    	}//fim do if
-										    }//fim do while
-										    
+																					    
 										  //Cria-se uma lista para percorrer a tag CHAVES (agentes chave) para ser feita uma análise de quantos trechos podem ser atendidos com e sem microrrede
 									  		List lista = agenteALBD.getChild("chaves").getChildren(); 
 											Iterator i = lista.iterator();
 //											int cont = 0;					
 											
 											int refFechar = 0; //referência do agente chave que deve fechar assim 
-											int refMicroRedeFechar = 0; //referência do agente apc que deve fechar assim 
+//											int refMicroRedeFechar = 0; //referência do agente apc que deve fechar assim 
 											
 										    while(i.hasNext()) { 
 										    	Element elemento = (Element) i.next();
@@ -665,34 +586,33 @@ public class agenteAlimentador extends Agent {
 										    			//***************************************DADOS DESSE TRECHO*****************************************************
 										    			double cargaTrecho = Double.parseDouble(elemento.getAttributeValue("carga")); //Saber a carga pré-falta só desse trecho
 										    			
-										    			//Essa parte é só pra saber a contribuição só dessa microrrede (cargaDisponviel + boost), pois pode eu quero cortar a possibilidade de atender o trecho que ela estiver conectada ai tiro o valor dela dos cálculos
-										    			double cargaMicrorredeTrecho = 0;
-										    			//Quero saber a carga só daS microrredeS conectada a esse trecho
-												  		List lista4 = agenteALBD.getChild("microrredes").getChild(nome).getChildren(); 
-														Iterator i4 = lista4.iterator();
-
-														 while(i4.hasNext()) { 
-														    	Element elemento4 = (Element) i4.next();
-														    	String nome4 = String.valueOf(elemento4.getName());
-														    	
-//																exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
-																
-														    	if (nome4!= null && nome4.length()>0 && nome4!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-														    		cargaMicrorredeTrecho = Double.parseDouble(elemento.getAttributeValue("potenciaDisponivel")) + Double.parseDouble(elemento.getAttributeValue("boost"));
-														    		
-														    	}
-														 }//********************************************************************************************
+//										    			//Essa parte é só pra saber a contribuição só dessa microrrede (cargaDisponviel + boost), pois pode eu quero cortar a possibilidade de atender o trecho que ela estiver conectada ai tiro o valor dela dos cálculos
+//										    			double cargaMicrorredeTrecho = 0;
+//										    			//Quero saber a carga só daS microrredeS conectada a esse trecho
+//												  		List lista4 = agenteALBD.getChild("microrredes").getChild(nome).getChildren(); 
+//														Iterator i4 = lista4.iterator();
+//
+//														 while(i4.hasNext()) { 
+//														    	Element elemento4 = (Element) i4.next();
+//														    	String nome4 = String.valueOf(elemento4.getName());
+//														    	
+////																exibirAviso(myAgent, "Analisando se aviso ao agente chave "+nome+" que comande o fechamento de seu religador.");
+//																
+//														    	if (nome4!= null && nome4.length()>0 && nome4!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+//														    		cargaMicrorredeTrecho = Double.parseDouble(elemento.getAttributeValue("potenciaDisponivel")) + Double.parseDouble(elemento.getAttributeValue("boost"));
+//														    		
+//														    	}
+//														 }//********************************************************************************************
 														 
 										    			if(cargaDiponivel > cargaTotalPerdida){ //Na primeira iteração nunca será possível pois se já estamos aqui é porque não foi mesmo possível outro AL suprir tudo
 										    				refFechar = referenciaDaChave + 1; //Tenho que fechar os religadores até essa referência    
 										    				exibirAviso(myAgent, "A carga disponível é >"+cargaDiponivel+" e a carga total perdida é >"+cargaTotalPerdida+". No caso cargaDisponivel > cargaTotalPerdida");
-										    			}
-										    			else if(cargaDiponivel > cargaTotalPerdida - cargaTotalDisponivelMicrorrede){ //então olha-se a contribuição de microrredes
-										    				refFechar = referenciaDaChave + 1;
-										    				refMicroRedeFechar = referenciaDaChave; //as microrredes daquele trecho em diante irão fechar
+//										    			}else if(cargaDiponivel > cargaTotalPerdida - cargaTotalDisponivelMicrorrede){ //então olha-se a contribuição de microrredes
+//										    				refFechar = referenciaDaChave + 1;
+//										    				refMicroRedeFechar = referenciaDaChave; //as microrredes daquele trecho em diante irão fechar
 										    			}else{ //Se mesmo com microrredes não for possível
 										    				cargaTotalPerdida = cargaTotalPerdida - cargaTrecho;
-										    				cargaTotalDisponivelMicrorrede = cargaTotalDisponivelMicrorrede - cargaMicrorredeTrecho; //Como esse trecho terá que sair a microrrede sai tbm										    			}//Ai vai pra próxima iteração
+//										    				cargaTotalDisponivelMicrorrede = cargaTotalDisponivelMicrorrede - cargaMicrorredeTrecho; //Como esse trecho terá que sair a microrrede sai tbm										    			}//Ai vai pra próxima iteração
 										    				
 										    			}// Fim do if para saber se referenciaDaChave>referenciaDaChaveAtuante
 										    		}
@@ -700,85 +620,6 @@ public class agenteAlimentador extends Agent {
 										    }// Fim do while(i.hasNext())
 										   
 										    if(refFechar>0){
-											    if(refMicroRedeFechar>0){	//Se tiver microrredes, fecho microrredes e chaves
-	//										     * 		request para os acs e micro e ae(s)
-											    	 /**********************************************************************************
-													     * Protocolo FIPA Request para solicitar que as chaves a jusante da falta fechem
-													     * 
-													     *********************************************************************************/
-												  		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-												  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-													  		
-												  		//Cria-se uma lista para percorrer a tag agentesArmazenamento e ver seus elementos
-												  		List lista5 = agenteALBD.getChild("microrredes").getChildren(); 
-														Iterator i5 = lista5.iterator();
-										    				
-									    				while(i5.hasNext()) { 
-													    	Element elemento5 = (Element) i5.next();
-													    	String nome5 = String.valueOf(elemento5.getName());
-													    	
-													    	int refChaveAnalisada = Integer.parseInt(nome5.split("_")[1].split("R")[1]);
-													    	
-													    	if (nome5!= null && nome5.length()>0 && nome5!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-													    		
-//													    		if(refChaveAnalisada>=refFechar){ //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<########################################
-													    		if(refChaveAnalisada>refFechar){	
-													    			msg.addReceiver(new AID((String) nome5, AID.ISLOCALNAME)); //Adicionei a chave
-													    			
-													    			//Add agora as microrredes também
-													    			//Cria-se uma lista para percorrer a tag agentesArmazenamento e ver seus elementos
-															  		List lista6 = agenteALBD.getChild(nome5).getChildren(); //Comando o fechamento logo de todas as microrredes dessa chave se tiverem
-																	Iterator i6 = lista6.iterator();
-													    			
-																	while(i6.hasNext()) { 
-																    	Element elemento6 = (Element) i6.next();
-																    	String nome6 = String.valueOf(elemento6.getName());
-																    
-																    	if (nome6!= null && nome6.length()>0 && nome6!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-																    		msg.addReceiver(new AID((String) nome6, AID.ISLOCALNAME)); //Adicionei a(s) microrredes também
-																    	}
-																	}	
-													    		}
-													    	}//Fim do if nome diferente de nada ou nenhum 
-									    				}//Fim do segundo while
-									    				
-									    				String chaveDeEncontro = agenteALBD.getChild("outrosALs").getChild(ALParticipante).getAttributeValue("chaveDeEncontro"); 	
-									    				msg.addReceiver(new AID((String) chaveDeEncontro, AID.ISLOCALNAME)); //Adicionei a chave de encontro
-									    				 	
-													    msg.setContent("fechar");
-												  		
-												  		addBehaviour(new AchieveREInitiator(myAgent, msg) {
-															protected void handleInform(ACLMessage inform) {
-																System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
-															}
-															protected void handleRefuse(ACLMessage refuse) {
-									//							System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
-									//							nResponders--;
-															}
-															protected void handleFailure(ACLMessage failure) {
-																if (failure.getSender().equals(myAgent.getAMS())) {
-																	// FAILURE notification from the JADE runtime: the receiver
-																	// does not exist
-																	System.out.println("Responder does not exist");
-																}
-																else {
-																	System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
-																}
-															}
-															protected void handleAllResultNotifications(Vector notifications) {
-									//							if (notifications.size() < nResponders) {
-									//								// Some responder didn't reply within the specified timeout
-									//								System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
-									//							}
-															}
-														}); //Fim do addBehaviour do request initiator
-											    	 
-									
-											    	 
-	//										     *  else
-	//										     	*/	//request somente pro acs e ae(s)
-											     }//Se houverem microrredes para serem alertadas
-											     else{//Se não houver microrredes, fecham só as chaves mesmo
 											    	 /**********************************************************************************
 													     * Protocolo FIPA Request para solicitar somente as chaves a jusante da falta que fechem
 													     * e AEs
@@ -835,7 +676,7 @@ public class agenteAlimentador extends Agent {
 														}); //Fim do addBehaviour do request initiator
 											     }
 										     }//Se houverem chaves para serem fechadas
-										}
+										
 									}//Fim do handle Informr
 								}); //Fim do contract net initiator
 					    	}// Fim do time elapse do waker behaviour
@@ -843,89 +684,89 @@ public class agenteAlimentador extends Agent {
 					   
 
 					} //Fim do if(cont>referenciaDaChaveAtuante)
-				    else{ //se não tem chaves a jusante, mas ver se não tem pelo menos microrrede no mesmo trecho.Chegando aqui nada pode ser feito para recomposição. É um alimentador que possui 1 trecho somente
-				    	exibirAviso(myAgent, "Não tem chaves a jusante. Vou ver se tem microrredes no trecho afetado que precisem ilhar.");
-				    	//*********Saber se tem agente apc e quantos são
-						List lista1 = agenteALBD.getChild("microrredes").getChild(agenteChaveSobFalta).getChildren(); 
-						Iterator i1 = lista1.iterator();
-						
-						int contMicrorrede = 0; //inicia cont com zero
-						
-					    while(i1.hasNext()) { 
-					    	Element elemento = (Element) i1.next();
-					    	String nome = String.valueOf(elemento.getName());
-					    	exibirAviso(myAgent, "Aqui é para aparecer o nome de um agente APC ou 'nenhum'.No caso está aparecendo: "+nome);
-					    	
-					    	if (nome!= null && nome.length()>0 && nome!="nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-					    		contMicrorrede = contMicrorrede + 1; //Se houver algum agente chave, incrementa o contador
-					    	}
-					    }
-					    exibirAviso(myAgent,"O valor de contMicrorrede é: "+contMicrorrede);
-					    
-					    if(contMicrorrede>0){ // Se existirem microrredes
-//					    if(cont>referenciaDaChaveAtuante){ //Se o número de agente chave for maior que o índice da chave atuante, é porque com certeza há chaves a jusante da chave atuante
-							exibirAviso(myAgent, "Há microrredes no trecho afetado. Preciso avisá-las para ilharem.");
-					    	/**********************************************************************************
-						     * Protocolo FIPA Request para solicitar que APCs abram suas chaves
-						     * 
-						     *********************************************************************************/
-					  		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-					  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-					  		msg.setContent("abra");
-					  		
-					  		
-					  		List lista2 = agenteALBD.getChild("microrredes").getChild(agenteChaveSobFalta).getChildren();
-							Iterator i2 = lista2.iterator();
-							
-						    while(i2.hasNext()) { 
-						    	Element elemento = (Element) i2.next();
-						    	String nome = String.valueOf(elemento.getName());
-						    	
-								exibirAviso(myAgent, "Analisando se aviso ao agente APC "+nome+" que comande a abertura de seu disjuntor.");
-								
-						    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){
-						    		
-				    				exibirAviso(myAgent, "Solicitando ao agente chave "+nome+" que comande a abertura de sua chave.");
-//						    				
-						    		msg.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
-								    		
-						    	}// Fim do if para saber se há chave
-						    }// Fim do while(i.hasNext())	
-					  		
-					  		
-						    addBehaviour(new AchieveREInitiator(myAgent, msg) {
-								protected void handleInform(ACLMessage inform) {
-									System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
-								}
-								protected void handleRefuse(ACLMessage refuse) {
-//									System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
-//									nResponders--;
-								}
-								protected void handleFailure(ACLMessage failure) {
-									if (failure.getSender().equals(myAgent.getAMS())) {
-										// FAILURE notification from the JADE runtime: the receiver
-										// does not exist
-										System.out.println("Responder does not exist");
-									}
-									else {
-										System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
-									}
-								}
-								protected void handleAllResultNotifications(Vector notifications) {
-//									if (notifications.size() < nResponders) {
-//										// Some responder didn't reply within the specified timeout
-//										System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
+//				    else{ //se não tem chaves a jusante, mas ver se não tem pelo menos microrrede no mesmo trecho.Chegando aqui nada pode ser feito para recomposição. É um alimentador que possui 1 trecho somente
+//				    	exibirAviso(myAgent, "Não tem chaves a jusante. Vou ver se tem microrredes no trecho afetado que precisem ilhar.");
+//				    	//*********Saber se tem agente apc e quantos são
+//						List lista1 = agenteALBD.getChild("microrredes").getChild(agenteChaveSobFalta).getChildren(); 
+//						Iterator i1 = lista1.iterator();
+//						
+//						int contMicrorrede = 0; //inicia cont com zero
+//						
+//					    while(i1.hasNext()) { 
+//					    	Element elemento = (Element) i1.next();
+//					    	String nome = String.valueOf(elemento.getName());
+//					    	exibirAviso(myAgent, "Aqui é para aparecer o nome de um agente APC ou 'nenhum'.No caso está aparecendo: "+nome);
+//					    	
+//					    	if (nome!= null && nome.length()>0 && nome!="nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+//					    		contMicrorrede = contMicrorrede + 1; //Se houver algum agente chave, incrementa o contador
+//					    	}
+//					    }
+//					    exibirAviso(myAgent,"O valor de contMicrorrede é: "+contMicrorrede);
+//					    
+//					    if(contMicrorrede>0){ // Se existirem microrredes
+////					    if(cont>referenciaDaChaveAtuante){ //Se o número de agente chave for maior que o índice da chave atuante, é porque com certeza há chaves a jusante da chave atuante
+//							exibirAviso(myAgent, "Há microrredes no trecho afetado. Preciso avisá-las para ilharem.");
+//					    	/**********************************************************************************
+//						     * Protocolo FIPA Request para solicitar que APCs abram suas chaves
+//						     * 
+//						     *********************************************************************************/
+//					  		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+//					  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+//					  		msg.setContent("abra");
+//					  		
+//					  		
+//					  		List lista2 = agenteALBD.getChild("microrredes").getChild(agenteChaveSobFalta).getChildren();
+//							Iterator i2 = lista2.iterator();
+//							
+//						    while(i2.hasNext()) { 
+//						    	Element elemento = (Element) i2.next();
+//						    	String nome = String.valueOf(elemento.getName());
+//						    	
+//								exibirAviso(myAgent, "Analisando se aviso ao agente APC "+nome+" que comande a abertura de seu disjuntor.");
+//								
+//						    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){
+//						    		
+//				    				exibirAviso(myAgent, "Solicitando ao agente chave "+nome+" que comande a abertura de sua chave.");
+////						    				
+//						    		msg.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+//								    		
+//						    	}// Fim do if para saber se há chave
+//						    }// Fim do while(i.hasNext())	
+//					  		
+//					  		
+//						    addBehaviour(new AchieveREInitiator(myAgent, msg) {
+//								protected void handleInform(ACLMessage inform) {
+//									System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+//								}
+//								protected void handleRefuse(ACLMessage refuse) {
+////									System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
+////									nResponders--;
+//								}
+//								protected void handleFailure(ACLMessage failure) {
+//									if (failure.getSender().equals(myAgent.getAMS())) {
+//										// FAILURE notification from the JADE runtime: the receiver
+//										// does not exist
+//										System.out.println("Responder does not exist");
 //									}
-								}//fim do protect void handleAllResultNotifications
-							}); //Fim do addBehaviour do Request para avisar as micrroredes do trecho onde houve falta
-				    
-					    }//If cont>0 (se tiver micrroredes no mesmo trecho onde houve falta
-					    else{
-//						resposta.setContent("ok");
-//						resposta.setPerformative(ACLMessage.AGREE); 
-					    	exibirAviso(myAgent,"Não há microrredes no trecho afetado.");
-					    }
-					}//Fim do if tiver chaves a jusante, senão verifica se não tem pelo menos microrrede no trecho afetado
+//									else {
+//										System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+//									}
+//								}
+//								protected void handleAllResultNotifications(Vector notifications) {
+////									if (notifications.size() < nResponders) {
+////										// Some responder didn't reply within the specified timeout
+////										System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
+////									}
+//								}//fim do protect void handleAllResultNotifications
+//							}); //Fim do addBehaviour do Request para avisar as micrroredes do trecho onde houve falta
+//				    
+//					    }//If cont>0 (se tiver micrroredes no mesmo trecho onde houve falta
+//					    else{
+////						resposta.setContent("ok");
+////						resposta.setPerformative(ACLMessage.AGREE); 
+//					    	exibirAviso(myAgent,"Não há microrredes no trecho afetado.");
+//					    }
+//					}//Fim do if tiver chaves a jusante, senão verifica se não tem pelo menos microrrede no trecho afetado
 				}// Fim do if(conteudo.equals("curto"))
 				else{ //Se não, é porque não houve curto e só está sendo repassado o valor de carga tanto de agentes chave como APCs para atualização
 					
@@ -956,7 +797,7 @@ public class agenteAlimentador extends Agent {
 					
 				}
 				
-				
+	
 				return resposta;
 			}//fim de handleSubscription
 			
