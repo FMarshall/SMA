@@ -112,7 +112,9 @@ public class agentePC extends Agent { /**
 //		MessageTemplate filtroInformMonitoramento = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		final MessageTemplate filtroInformMonitoramento = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchSender(getAID("tcpACP1")));
 		
-		final MessageTemplate filtroIlha = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+//		final MessageTemplate filtroIlha = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+		final MessageTemplate filtroIlha = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+		  		MessageTemplate.MatchContent("abra")); //filtro do al mandando ela abrir devido curto na rede
 		
 		final MessageTemplate filtroFechar = MessageTemplate.and(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 		  		MessageTemplate.MatchContent("fechar")); //filtro do al mandando ela fechar
@@ -170,12 +172,14 @@ public class agentePC extends Agent { /**
 					
 //					String boost = agenteApcBD.getChild("medidasAtuais").get <--para esse tenho que fazer um while, ver se tem fonte controlada e pegar o valor de capacidade dela. Esse valor tem que ser atualizado por essa fonte
 					
-					double correnteBoost = (100e3)/(13.8e3/Math.sqrt(3));
+//					double correnteBoost = (100e3)/(13.8e3/Math.sqrt(3));
+					double correnteBoost = (100e3)/(13.8e3*Math.sqrt(3));
 //					double correnteBoost = 2.1;
 					
 //					String boost = String.valueOf(50000/13800); //"3.62"; //carga nominal da Cac
 					String boost = String.valueOf(correnteBoost); //"3.62"; //carga nominal da Cac
 					
+					exibirAviso(myAgent, "O valor de corrente boost é "+boost);
 					/*
 					 * Se deltaP positivo, então a uRede está injetando, logo quando AL initiator for solicitar tem-se IPerdida = Imedida + IuRede 
 					 * Se deltaP negativo, então a uRede está consumindo, logo quando AL initiator for solicitar tem-se IPerdida = Imedida - IuRede 
@@ -847,7 +851,7 @@ public class agentePC extends Agent { /**
 						/**
 						 * Aqui vamos acessar o XML do APC para pesquisar o nome dos agentes de geração intermitente
 						 * e cargas para calcular o balanço de potência na microrrede
-						 * */
+						 **/
 						List lista2 = agenteApcBD.getChild("agentesCarga").getChildren(); 
 //						System.out.println("O nome dos ADs são: "+lista2); //Só pra ver se deu certo
 						Iterator i2 = lista2.iterator();

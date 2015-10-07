@@ -7,7 +7,7 @@
 		<estado>disponivel</estado>
 		
 		<chaves> <!-- Chaves normais -->
-			<AL1_R1 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "7"  capacidade="215"/>   
+			<AL1_R1 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "7"  capacidade="266"/>   
 			<AL1_R2 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "6" capacidade="215"/>
 			<AL1_R3 atuacao = "nao" estado = "fechada"  carga = "1" sentido = "+" trecho = "5" capacidade="215" />
 		</chaves>
