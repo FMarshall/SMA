@@ -117,6 +117,7 @@ public class agenteAlimentador extends Agent {
 				    while(i.hasNext()) { 
 				    	Element elemento = (Element) i.next();
 				    	String nome = String.valueOf(elemento.getName());
+				    	
 				    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
 				    		cont = cont + 1; //Se houver algum agente chave, incrementa o contador
 				    	}
@@ -717,90 +718,92 @@ public class agenteAlimentador extends Agent {
 					    });	//Fim do waker behaviour
 					   
 
-					} //Fim do if(cont>referenciaDaChaveAtuante)
-//				    else{ //se não tem chaves a jusante, mas ver se não tem pelo menos microrrede no mesmo trecho.Chegando aqui nada pode ser feito para recomposição. É um alimentador que possui 1 trecho somente
-//				    	exibirAviso(myAgent, "Não tem chaves a jusante. Vou ver se tem microrredes no trecho afetado que precisem ilhar.");
-//				    	//*********Saber se tem agente apc e quantos são
-//						List lista1 = agenteALBD.getChild("microrredes").getChild(agenteChaveSobFalta).getChildren(); 
-//						Iterator i1 = lista1.iterator();
-//						
-//						int contMicrorrede = 0; //inicia cont com zero
-//						
-//					    while(i1.hasNext()) { 
-//					    	Element elemento = (Element) i1.next();
-//					    	String nome = String.valueOf(elemento.getName());
-//					    	exibirAviso(myAgent, "Aqui é para aparecer o nome de um agente APC ou 'nenhum'.No caso está aparecendo: "+nome);
-//					    	
-//					    	if (nome!= null && nome.length()>0 && nome!="nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
-//					    		contMicrorrede = contMicrorrede + 1; //Se houver algum agente chave, incrementa o contador
-//					    	}
-//					    }
-//					    exibirAviso(myAgent,"O valor de contMicrorrede é: "+contMicrorrede);
-//					    
-//					    if(contMicrorrede>0){ // Se existirem microrredes
-////					    if(cont>referenciaDaChaveAtuante){ //Se o número de agente chave for maior que o índice da chave atuante, é porque com certeza há chaves a jusante da chave atuante
-//							exibirAviso(myAgent, "Há microrredes no trecho afetado. Preciso avisá-las para ilharem.");
-//					    	/**********************************************************************************
-//						     * Protocolo FIPA Request para solicitar que APCs abram suas chaves
-//						     * 
-//						     *********************************************************************************/
-//					  		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-//					  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-//					  		msg.setContent("abra");
-//					  		
-//					  		
-//					  		List lista2 = agenteALBD.getChild("microrredes").getChild(agenteChaveSobFalta).getChildren();
-//							Iterator i2 = lista2.iterator();
-//							
-//						    while(i2.hasNext()) { 
-//						    	Element elemento = (Element) i2.next();
-//						    	String nome = String.valueOf(elemento.getName());
-//						    	
-//								exibirAviso(myAgent, "Analisando se aviso ao agente APC "+nome+" que comande a abertura de seu disjuntor.");
-//								
-//						    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){
-//						    		
-//				    				exibirAviso(myAgent, "Solicitando ao agente chave "+nome+" que comande a abertura de sua chave.");
-////						    				
-//						    		msg.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
-//								    		
-//						    	}// Fim do if para saber se há chave
-//						    }// Fim do while(i.hasNext())	
-//					  		
-//					  		
-//						    addBehaviour(new AchieveREInitiator(myAgent, msg) {
-//								protected void handleInform(ACLMessage inform) {
-//									System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
-//								}
-//								protected void handleRefuse(ACLMessage refuse) {
-////									System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
-////									nResponders--;
-//								}
-//								protected void handleFailure(ACLMessage failure) {
-//									if (failure.getSender().equals(myAgent.getAMS())) {
-//										// FAILURE notification from the JADE runtime: the receiver
-//										// does not exist
-//										System.out.println("Responder does not exist");
+					} //Fim do if(cont>referenciaDaChaveAtuante) Para saber se tem chaves a jusante do trecho em falta!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+				    
+				    
+				    else{ //se não tem chaves a jusante, mas ver se não tem pelo menos microrrede no mesmo trecho.Chegando aqui nada pode ser feito para recomposição. É um alimentador que possui 1 trecho somente
+				    	exibirAviso(myAgent, "Não tem chaves a jusante. Vou ver se tem microrredes no trecho afetado que precisem ilhar.");
+				    	//*********Saber se tem agente apc e quantos são
+						List lista1 = agenteALBD.getChild("microrredes").getChild(agenteChaveSobFalta).getChildren(); 
+						Iterator i1 = lista1.iterator();
+						
+						int contMicrorrede = 0; //inicia cont com zero
+						
+					    while(i1.hasNext()) { 
+					    	Element elemento = (Element) i1.next();
+					    	String nome = String.valueOf(elemento.getName());
+					    	exibirAviso(myAgent, "Aqui é para aparecer o nome de um agente APC ou 'nenhum'.No caso está aparecendo: "+nome);
+					    	
+					    	if (nome!= null && nome.length()>0 && nome!="nenhum"){ //Se houver agentes chave no XML, então add ele como remetente
+					    		contMicrorrede = contMicrorrede + 1; //Se houver algum agente chave, incrementa o contador
+					    	}
+					    }
+					    exibirAviso(myAgent,"O valor de contMicrorrede é: "+contMicrorrede);
+					    
+					    if(contMicrorrede>0){ // Se existirem microrredes
+//					    if(cont>referenciaDaChaveAtuante){ //Se o número de agente chave for maior que o índice da chave atuante, é porque com certeza há chaves a jusante da chave atuante
+							exibirAviso(myAgent, "Há microrredes no trecho afetado. Preciso avisá-las para ilharem.");
+					    	/**********************************************************************************
+						     * Protocolo FIPA Request para solicitar que APCs abram suas chaves
+						     * 
+						     *********************************************************************************/
+					  		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+					  		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+					  		msg.setContent("abra");
+					  		
+					  		
+					  		List lista2 = agenteALBD.getChild("microrredes").getChild(agenteChaveSobFalta).getChildren();
+							Iterator i2 = lista2.iterator();
+							
+						    while(i2.hasNext()) { 
+						    	Element elemento = (Element) i2.next();
+						    	String nome = String.valueOf(elemento.getName());
+						    	
+								exibirAviso(myAgent, "Analisando se aviso ao agente APC "+nome+" que comande a abertura de seu disjuntor.");
+								
+						    	if (nome!= null && nome.length()>0 && nome!= "nenhum"){
+						    		
+				    				exibirAviso(myAgent, "Solicitando ao agente chave "+nome+" que comande a abertura de sua chave.");
+//						    				
+						    		msg.addReceiver(new AID((String) nome, AID.ISLOCALNAME));
+								    		
+						    	}// Fim do if para saber se há chave
+						    }// Fim do while(i.hasNext())	
+					  		
+					  		
+						    addBehaviour(new AchieveREInitiator(myAgent, msg) {
+								protected void handleInform(ACLMessage inform) {
+									System.out.println("Agent "+inform.getSender().getName()+" successfully performed the requested action");
+								}
+								protected void handleRefuse(ACLMessage refuse) {
+//									System.out.println("Agent "+refuse.getSender().getName()+" refused to perform the requested action");
+//									nResponders--;
+								}
+								protected void handleFailure(ACLMessage failure) {
+									if (failure.getSender().equals(myAgent.getAMS())) {
+										// FAILURE notification from the JADE runtime: the receiver
+										// does not exist
+										System.out.println("Responder does not exist");
+									}
+									else {
+										System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
+									}
+								}
+								protected void handleAllResultNotifications(Vector notifications) {
+//									if (notifications.size() < nResponders) {
+//										// Some responder didn't reply within the specified timeout
+//										System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
 //									}
-//									else {
-//										System.out.println("Agent "+failure.getSender().getName()+" failed to perform the requested action");
-//									}
-//								}
-//								protected void handleAllResultNotifications(Vector notifications) {
-////									if (notifications.size() < nResponders) {
-////										// Some responder didn't reply within the specified timeout
-////										System.out.println("Timeout expired: missing "+(nResponders - notifications.size())+" responses");
-////									}
-//								}//fim do protect void handleAllResultNotifications
-//							}); //Fim do addBehaviour do Request para avisar as micrroredes do trecho onde houve falta
-//				    
-//					    }//If cont>0 (se tiver micrroredes no mesmo trecho onde houve falta
+								}//fim do protect void handleAllResultNotifications
+							}); //Fim do addBehaviour do Request para avisar as micrroredes do trecho onde houve falta
+				    
+					    }//If cont>0 (se tiver micrroredes no mesmo trecho onde houve falta
 //					    else{
 ////						resposta.setContent("ok");
 ////						resposta.setPerformative(ACLMessage.AGREE); 
 //					    	exibirAviso(myAgent,"Não há microrredes no trecho afetado.");
 //					    }
-//					}//Fim do if tiver chaves a jusante, senão verifica se não tem pelo menos microrrede no trecho afetado
+					}//Fim do if tiver chaves a jusante, senão verifica se não tem pelo menos microrrede no trecho afetado
 				}// Fim do if(conteudo.equals("curto"))
 				else{ //Se não, é porque não houve curto e só está sendo repassado o valor de carga tanto de agentes chave como APCs para atualização
 					

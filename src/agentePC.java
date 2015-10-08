@@ -228,7 +228,10 @@ public class agentePC extends Agent { /**
 					 * O camando será enviado como resposta ao inform da medição. São aproveitadas 2 das variáveis anteriores 
 					 */
 					String comandoChave = agenteApcBD.getChild("comando").getChild("estadoChave").getText(); //Consulta no XML o valor do disjuntor a jusante do inversor
-					cr = comandoChave;				
+					cr = comandoChave;	
+					exibirAviso(myAgent, "o estado da chave é "+cr);
+					
+					
 //					ACLMessage resposta = msg.createReply();
 //					resposta.setContent(cr);
 //					send(resposta);  //enviando a mensagem de resposta do Inform ao Matlalb
@@ -1075,36 +1078,22 @@ public class agentePC extends Agent { /**
 			private static final long serialVersionUID = 1L;
 
 			protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
-//				System.out.println("Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
-//				if (checkAction()) {
-//					// We agree to perform the action. Note that in the FIPA-Request
-//					// protocol the AGREE message is optional. Return null if you
-//					// don't want to send it.
-//					System.out.println("Agent "+getLocalName()+": Agree");
-//					ACLMessage agree = request.createReply();
-//					agree.setPerformative(ACLMessage.AGREE);
-//					return agree;
-//				}
-//				else {
-//					// We refuse to perform the action
-//					System.out.println("Agent "+getLocalName()+": Refuse");
-//					throw new RefuseException("check-failed");
-//				}
-//				exibirAviso(myAgent, "Agent "+getLocalName()+ ": REQUEST received from "+request.getSender().getName()+". Action is "+request.getContent());
 				
+				agenteApcBD.getChild("comando").getChild("estadoChave").setText("0"); //seta o XML o disjuntor abrindo
 				ACLMessage resposta = request.createReply();
 				
-				if(request.getContent().equals("abra")){
+//				if(request.getContent().equals("abra")){
 					//Antes eu dou uma atualizada no XML
-					agenteApcBD.getChild("comando").getChild("estadoChave").setText("0"); //seta o XML o disjuntor abrindo
+//					agenteApcBD.getChild("comando").getChild("estadoChave").setText("0"); //seta o XML o disjuntor abrindo
+					exibirAviso(myAgent, "Irei ilhar!");
 					
-					resposta.setContent("Ok");
+					resposta.setContent("Okkkk");
 					resposta.setPerformative(ACLMessage.AGREE);
-				};
+//				};
 				
 				return resposta;
 			}
-		} );//Fim do request responder 
+		});//Fim do request responder 
 		
 		/*************************************************************************
 		 * FIPA Request Responder para responder a solicitação do AL para fechar
@@ -1135,7 +1124,7 @@ public class agentePC extends Agent { /**
 				
 				ACLMessage resposta = request.createReply();
 				resposta.setPerformative(ACLMessage.AGREE);
-				resposta.setContent("ok");
+				resposta.setContent("okfechar");
 				
 				//Antes seto no XML que o agente chave irá comandar a abertura da sua chave quando for responder ao inform de monitoramento do matlab
 				agenteApcBD.getChild("comando").getChild("estadoChave").setText("1"); //seta o XML o disjuntor fechando
@@ -1148,7 +1137,7 @@ public class agentePC extends Agent { /**
 		/**************************************************************************
 		 * FIPA Request Responder para responder a solicitação do AL para acionar sua geração controlada para dar um BOOST
 		 ***************************************************************************/
-		addBehaviour(new AchieveREResponder(this, filtroIlha) {
+		addBehaviour(new AchieveREResponder(this, filtroBoost) {
 			/**
 			 * 
 			 */
